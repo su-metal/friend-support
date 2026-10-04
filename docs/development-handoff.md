@@ -10,6 +10,18 @@
 - 支援者は専用アカウント不要。主催者はFirebase Email Link。
 - LINEミニアプリ・ネイティブアプリとPhase 2〜6の利用機能は未提供。
 
+## UIブラッシュアップ ステップ0：不具合修正（2026-10-04）
+
+担当ツール：Claude Code（クラウドセッション、ブランチ `ccr-3337d7e4-ms7z5f`）。ユーザーとの壁打ちで、UIブラッシュアップを次の順に進めると合意した：0 不具合修正 → 1 支援者導線（担当ボタンの強調、進捗表示の文言、管理リンクの保存手段）→ 2 主催者の予定まとめ作成（`docs/tasks/` で設計してから実装）→ 3 ブランド・トップページ（利用実績を見て判断）。ステップ1は変更前後のモックで合意してから実装する。
+
+- 作成ステップ2：終了日の入力欄が375/390pxでカードからはみ出していたため、`.field-grid` の列を `minmax(0, 1fr)` にした。
+- ダッシュボード：予定日より前の担当確定済み予定には「完了にする」を出さず、「予定日以降に完了にできます」と表示する。サーバー側の拒否（`services/support.ts` の `future`）は従来どおり。
+- `app/icon.svg` を追加。ヘッダーのロゴと同じ図柄で、`/favicon.ico` の404を解消した。
+- 開発画面の「Issues」の残り1件は、React開発モードのeval警告（CSPによるもの、本番ビルドでは発生しない）。初回の撮影時に一度だけダッシュボードでhydration不一致の警告が出たが、再実行では再現しなかった。
+- ローカル検証（Linux）：`npm run docs:check`、`typecheck`、`lint`、`test`（25件）、`test:db`（4件、全件通過。Windowsで出ていたキャンセル時の409はこの環境では再現せず）、`build:cloudflare`、`test:e2e`（5件）すべて成功。Playwrightは環境に用意されたChromiumを指定した一時設定で実行した。
+- Linuxでは `package-lock.json` と任意依存（`@emnapi/*`）がずれて `npm ci` が失敗するため、lockfileを変更せずに `npm install --package-lock=false` で導入した。lockfileは未変更。
+- デプロイ、Firebase・Cloudflare・Resendの設定変更、実メール送信はしていない。
+
 ## GitHubへの初回登録（2026-10-04）
 
 担当ツール：Codex。作業内容：アプリのソースを公開リポジトリ `su-metal/friend-support` の `main` に初回登録した。
