@@ -1,0 +1,30 @@
+{
+  "indexes": [],
+  "fieldOverrides": [
+    {
+      "collectionGroup": "notifications",
+      "fieldPath": "encryptedText",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "page_secrets",
+      "fieldPath": "passcodeHash",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "slot_secrets",
+      "fieldPath": "privateInstructions",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "slot_assignments",
+      "fieldPath": "supporterEmail",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "rate_limit_buckets",
+      "fieldPath": "expiresAt",
+      "indexes": []
+    }
+  ]
+}

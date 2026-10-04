@@ -1,0 +1,31 @@
+# Phase 2〜6の拡張方針
+
+Phase 1の利用フローは「作る→身近な人に共有→できる人が担当」。将来機能は、この主要導線へ不要な設定を増やさず追加する。
+
+| Phase | 既存の基盤 | 追加する実装 |
+|---|---|---|
+| 2: Plus | SupportPage.plan、価格設定、Purchase、PaymentProvider、機能フラグ | Stripe checkout/webhookの署名・冪等処理、権限更新、Plus UI、カレンダー、写真、一括通知 |
+| 3: ギフト | GiftPartner、GiftPartnerService、affiliate種別、専用イベント | 外部URLの検証、広告表示、送客・成果計測。決済主体はパートナー |
+| 4: Organization Pro | organizationId、Organization、OrganizationMember、PageMember、Subscription状態 | 組織単位の権限、複数担当者管理、課金、CSV、集計・ページング |
+| 5: ケース拡張 | SupportCaseType、CaseTemplate、カテゴリ共通モデル | illness/recovery/caregiving/bereavementのテンプレート選択とケース別の入力・コピー |
+| 6: 確認後に追加 | 担当トークン方式、PageMember、pending_recipient_approval、EmailProvider | 支援者アカウントの任意リンク、繰返し枠、待機リスト、受取人承認、カレンダー連携、SMS |
+
+## モデルとサービス
+
+`services/contracts.ts` をユースケースとプロバイダーの契約とする。永続化は `DocumentStore`、Firestore RESTはアダプター。UIから直接Firestoreへアクセスしない。公開ページ、主催者画面、担当管理リンクの権限を分け、公開レスポンスは項目を明示して作る。
+
+組織対応では現在の主催者ID確認を、ページの管理権限を解決するサービスへ差し替える。現在のPageMemberは主催者だけを登録しており、共同管理者の権限はまだ有効にしない。organizationIdが追加されても、所属組織とページが一致する確認を省略しない。
+
+決済機能は現在503を返す停止実装。決済ボタンやAPIを開放していない。webhookイベントIDの処理記録とPurchase更新を同一トランザクションで確定し、成功した決済だけで対象のプラン権限を更新する。フラグONだけで提供開始しない。
+
+支援者アカウントを追加する場合、既存の匿名担当と管理リンクを維持し、本人確認後に担当をアカウントへ関連付ける。繰返し枠は具体的な日付のSupportSlotへ展開し、既存の担当競合・キャンセル処理を利用する。待機リストは確定した担当と別のコレクションで管理する。
+
+受取人承認は、承認待ちのページを公開APIで取得させない。承認トークンは用途別に発行・ハッシュ化し、担当トークンを流用しない。健康情報の公開範囲は自動拡張しない。
+
+## 運用と移行
+
+空のFirestoreコレクションは先に作成せず、型とコレクション契約で予約する。追加seedは `schema_versions/v2` など新しい移行スクリプトにする。現在のseedを上書きして実利用データを書き換えない。
+
+現在のConsumer規模では予定をbatchGetで取得する。Proの一覧・集計にはカーソル付きクエリ、集計用ドキュメント、通知キューを追加する。通知の再送は既存のoutbox IDとリース方式を維持する。メール以外のプロバイダーでも同じ確定処理から送信要求を分離する。
+
+支援金送金、不特定多数マッチング、報酬、DM、医療相談、配送、食品販売は追加しない。寄付フラグは常にfalse。

@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Cloudflareの検証済みサーバーAPIだけがIAM経由で操作する。
+    // 公開ページにもブラウザーからの直接DBアクセスを許可しない。
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

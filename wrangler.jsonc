@@ -1,0 +1,55 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "friend-support",
+  "workers_dev": true,
+  "preview_urls": false,
+  "main": "cloudflare-entry.mjs",
+  "compatibility_date": "2026-10-04",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "global_fetch_strictly_public"
+  ],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "friend-support"
+    }
+  ],
+  "vars": {
+    "APP_MODE": "firebase",
+    "FIREBASE_PROJECT_ID": "support-circle-31a09",
+    "APP_URL": "https://friend-support.tossy104104.workers.dev",
+    "ENABLE_PLUS": "false",
+    "ENABLE_PRO": "false",
+    "ENABLE_GIFT_PARTNERS": "false",
+    "ENABLE_RECIPIENT_APPROVAL": "false",
+    "ENABLE_CONTRIBUTIONS": "false",
+    "ENABLE_CASE_TYPES": "false",
+    "ENABLE_CALENDAR_VIEW": "false",
+    "ENABLE_SMS": "false",
+    "PLUS_PRICE_JPY": "980",
+    "PRO_MONTHLY_PRICE_JPY": "4980"
+  },
+  "triggers": {
+    "crons": [
+      "*/10 * * * *"
+    ]
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "invocation_logs": false
+    },
+    "traces": {
+      "enabled": true,
+      "head_sampling_rate": 1
+    }
+  }
+}

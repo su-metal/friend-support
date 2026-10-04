@@ -1,0 +1,11 @@
+node_modules
+.next
+.open-next
+.wrangler
+.secrets
+cloudflare-env.d.ts
+next-env.d.ts
+docs/product-specification.md
+output
+test-results
+package-lock.json
