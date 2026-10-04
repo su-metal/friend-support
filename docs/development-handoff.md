@@ -10,6 +10,15 @@
 - 支援者は専用アカウント不要。主催者はFirebase Email Link。
 - LINEミニアプリ・ネイティブアプリとPhase 2〜6の利用機能は未提供。
 
+## GitHubへの初回登録（2026-10-04）
+
+担当ツール：Codex。作業内容：アプリのソースを公開リポジトリ `su-metal/friend-support` の `main` に初回登録した。
+
+- 初回コミット `c0a654df0c71fae1ebe8693b1a68d93e3d742498`。GitHub APIで `main` のコミットと103ファイルを読み戻し確認。ローカルブランチは `origin/main` を追跡し、作業ツリーはclean。
+- リポジトリはPublic。`.gitignore` に `output/` を追加し、`.env.local`、`.secrets/`、Firebaseデバッグログ、監査出力・スクリーンショット、生成物・キャッシュは登録していない。公開用 `.env.example` は秘密値を空欄にした。ステージしたファイルの資格情報パターン検査は該当なし。
+- この作業はソースのGitHub登録のみ。GitHub Actionsによる自動デプロイは設定しておらず、Cloudflare Workerの再デプロイ、Firebase・Resendへの接続変更、実メール送信もしていない。公開先は従来どおり https://friend-support.tossy104104.workers.dev 。
+- ローカル検証：`npm run docs:check`、`npm run typecheck`、`npm run lint`、`npm run test`（25件）、`npm run test:db`（4件）、`npm run build:cloudflare`、`npm run test:e2e`（5件）すべて成功。E2Eで375/390/430pxの主要導線を確認。OpenNextからWindows実行に関する既知の警告あり。
+
 ## 直近の変更
 
 担当ツール：Codex。作業内容：利用拡大に向け、サービス紹介の対象を一時的な生活支援へ広げ、公開ガイドと検索向けメタデータを実装した。
