@@ -1251,13 +1251,18 @@ strong {
   padding: 18px 22px;
   margin-top: 28px;
 }
-.support-progress > .row:first-child {
-  font-size: 11px;
-}
-.support-progress > .row:first-child > span {
-  color: var(--sage);
-  font-size: 17px;
+.support-progress-lead {
+  font-size: 15px;
   font-weight: 650;
+}
+.support-progress-lead strong {
+  color: var(--sage-dark);
+  font-size: 21px;
+  margin: 0 4px;
+}
+.support-progress-note {
+  font-size: 12px;
+  color: var(--muted);
 }
 .progress-track {
   height: 6px;
@@ -1428,17 +1433,16 @@ strong {
 }
 .slot-cta {
   align-self: center;
-  padding: 10px 14px;
-  font-size: 11px;
-  min-height: 42px;
-  border-color: #c6d4c8;
-  background: var(--light-sage);
-  color: var(--sage);
+  padding: 10px 18px;
+  font-size: 13px;
+  min-height: 46px;
+  background: var(--sage-dark);
+  color: #fff;
   white-space: nowrap;
   gap: 9px;
 }
 .slot-cta:hover {
-  background: #e4ecdf;
+  background: var(--ink);
 }
 .support-privacy {
   display: flex;
@@ -1560,6 +1564,53 @@ strong {
   font-size: 12px;
   color: var(--muted);
   margin-top: 12px;
+}
+.save-link {
+  border: 2px solid var(--coral);
+  border-radius: 12px;
+  background: #fdf8f3;
+  padding: 20px;
+  margin-top: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.save-link-heading {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.save-link-heading > svg {
+  flex-shrink: 0;
+  margin-top: 4px;
+  color: #9a5d40;
+}
+.save-link-heading h2 {
+  font-size: 15px;
+}
+.save-link-heading p {
+  font-size: 12px;
+  color: #4f5f5a;
+  margin-top: 2px;
+}
+.save-link-hint {
+  font-size: 11px;
+  color: #4f5f5a;
+  text-align: center;
+  margin-top: -4px;
+}
+.save-link-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+}
+.save-link-actions .button {
+  padding: 10px 8px;
+  gap: 6px;
+  font-size: 12px;
+}
+.save-link .status-message:empty {
+  display: none;
 }
 .manage-card {
   border: 1px solid var(--line);
@@ -2624,14 +2675,14 @@ strong {
     padding: 15px 16px;
     margin-top: 22px;
   }
-  .support-progress > .row:first-child {
-    font-size: 10px;
+  .support-progress-lead {
+    font-size: 14px;
   }
-  .support-progress > .row.small {
-    font-size: 9px;
+  .support-progress-lead strong {
+    font-size: 19px;
   }
-  .support-progress > .row:first-child > span {
-    font-size: 16px;
+  .support-progress-note {
+    font-size: 11px;
   }
   .support-body {
     padding-top: 25px;
@@ -2640,7 +2691,7 @@ strong {
     font-size: 18px;
   }
   .schedule-heading > .small {
-    font-size: 9px;
+    font-size: 10px;
   }
   .category-filters {
     gap: 6px;
@@ -2699,8 +2750,8 @@ strong {
   .slot-cta {
     width: 100%;
     margin-top: 3px;
-    min-height: 43px;
-    font-size: 12px;
+    min-height: 48px;
+    font-size: 14px;
     justify-content: center;
   }
   .support-privacy {
@@ -2708,10 +2759,10 @@ strong {
     gap: 10px;
   }
   .support-privacy strong {
-    font-size: 10px;
+    font-size: 12px;
   }
   .support-privacy p {
-    font-size: 9px;
+    font-size: 11px;
   }
   .support-privacy > svg {
     width: 19px;

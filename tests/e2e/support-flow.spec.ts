@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { test, expect } from "@playwright/test";
 for (const width of [375, 390, 430]) {
   test(`主催者作成 → 公開 → 匿名担当 → 主催者確認 → キャンセル (${width}px)`, async ({
@@ -89,7 +90,7 @@ for (const width of [375, 390, 430]) {
     await visitor.getByLabel("お名前", { exact: true }).fill("E2E支援者");
     await visitor.getByLabel("ひとこと").fill("主催者にだけ伝える内容");
     await visitor
-      .getByRole("button", { name: "この予定を担当する", exact: true })
+      .getByRole("button", { name: "担当を決める", exact: true })
       .click();
     await expect(
       visitor.getByRole("heading", { name: "担当が決まりました！" }),
@@ -100,6 +101,23 @@ for (const width of [375, 390, 430]) {
     await expect(
       visitor.getByText("E2E非公開食事注意", { exact: true }),
     ).toBeVisible();
+    await expect(
+      visitor.getByRole("heading", {
+        name: "この画面のリンクを、いま保存してください",
+      }),
+    ).toBeVisible();
+    await expect(
+      visitor.getByRole("button", { name: "LINEで自分に送る" }),
+    ).toBeVisible();
+    const [calendarFile] = await Promise.all([
+      visitor.waitForEvent("download"),
+      visitor.getByRole("button", { name: "カレンダーに追加" }).click(),
+    ]);
+    const ics = await readFile(await calendarFile.path(), "utf8");
+    const unfoldedIcs = ics.replace(/\r\n /g, "");
+    expect(unfoldedIcs).toContain("BEGIN:VEVENT");
+    expect(unfoldedIcs).toContain(new URL(visitor.url()).pathname);
+    expect(unfoldedIcs).not.toContain("E2E非公開");
     await page.goto(dashboardUrl);
     await expect(
       page.getByText("E2E支援者さん", { exact: true }),
