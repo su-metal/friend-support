@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import type { OrganizerPage } from "@/types/domain";
 import { categories } from "@/config/product";
-import { fillStats, dateLabel, isPageClosed } from "@/lib/domain";
+import { fillStats, dateLabel, isPageClosed, todayJst } from "@/lib/domain";
 import { ErrorMessage, postJson, requestJson, Modal } from "./ui";
 import { ShareButtons } from "./share";
 export function AccountSignOut() {
@@ -120,7 +120,8 @@ export function DashboardDetail({
     ),
     [menuOpen, setMenuOpen] = useState(false);
   const stats = fillStats(page.slots),
-    closed = isPageClosed(page);
+    closed = isPageClosed(page),
+    today = todayJst();
   async function changeStatus(status: string) {
     setBusy(true);
     setError("");
@@ -322,7 +323,12 @@ export function DashboardDetail({
                         <p className="assignment-message">{a.message}</p>
                       )}
                     </div>
-                    {s.status === "assigned" && (
+                    {s.status === "assigned" && s.date > today && (
+                      <span className="slot-complete-note">
+                        予定日以降に完了にできます
+                      </span>
+                    )}
+                    {s.status === "assigned" && s.date <= today && (
                       <button
                         className="button small-button secondary"
                         disabled={busy}

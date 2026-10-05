@@ -5,12 +5,17 @@ import { useState } from "react";
 import {
   Check,
   CalendarDays,
+  CalendarPlus,
   Clock3,
+  Copy,
+  Link2,
   LockKeyhole,
   Heart,
   ArrowRight,
+  MessageCircle,
 } from "lucide-react";
 import { categories } from "@/config/product";
+import { buildIcs } from "@/lib/calendar";
 import { dateLabel } from "@/lib/domain";
 import type { ManagedAssignment } from "@/types/domain";
 import { Modal, ErrorMessage, postJson } from "./ui";
@@ -36,7 +41,6 @@ export function ManageAssignment({
         <span className="success-icon">
           {cancelled ? <Heart size={27} /> : <Check size={28} />}
         </span>
-        <p className="eyebrow">THANK YOU FOR YOUR HELP</p>
         <h1>
           {cancelled
             ? "担当をキャンセルしました"
@@ -52,6 +56,14 @@ export function ManageAssignment({
             : `${a.supporterName}さん、ありがとうございます。`}
         </p>
       </div>
+      {a.status === "active" && (
+        <SaveManageLink
+          assignment={a}
+          token={token}
+          isNew={isNew}
+          emailEnabled={emailEnabled}
+        />
+      )}
       <div className="manage-card">
         <p className="small muted">{a.page.recipientDisplayName}へのサポート</p>
         <div className="assignment-summary">
@@ -110,18 +122,7 @@ export function ManageAssignment({
               </dl>
             )}
             <p className="field-hint">
-              この情報と管理リンクは、ご本人だけで保管してください。
-            </p>
-          </div>
-        )}
-        {!cancelled && (
-          <div className="gentle-note">
-            <strong>このページをブックマークしてください。</strong>
-            <p>
-              この管理リンクから、予定の確認とキャンセルができます。
-              {emailEnabled
-                ? "メールを入力した場合は確認メールでもお知らせします。"
-                : "通知メールは準備中です。管理リンクから予定をご確認ください。"}
+              この案内は、ほかの人に共有しないでください。
             </p>
           </div>
         )}
@@ -179,5 +180,104 @@ export function ManageAssignment({
         </Modal>
       )}
     </div>
+  );
+}
+function SaveManageLink({
+  assignment: a,
+  token,
+  isNew,
+  emailEnabled,
+}: {
+  assignment: ManagedAssignment;
+  token: string;
+  isNew: boolean;
+  emailEnabled: boolean;
+}) {
+  const [message, setMessage] = useState("");
+  const manageUrl = () =>
+    `${window.location.origin}/manage-assignment/${token}`;
+  const eventTitle = `${a.slot.title}（${a.page.recipientDisplayName}へのサポート）`;
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(manageUrl());
+      setMessage("リンクをコピーしました");
+    } catch {
+      setMessage(
+        "コピーできませんでした。この画面をブックマークしてください。",
+      );
+    }
+  }
+  function sendToLine() {
+    const text = `【となりの手】あなた専用の担当管理リンクです。他の人には送らないでください。\n${eventTitle} ${dateLabel(a.slot.date)}\n${manageUrl()}`;
+    window.open(
+      `https://line.me/R/msg/text/?${encodeURIComponent(text)}`,
+      "_blank",
+      "noopener,noreferrer",
+    );
+  }
+  function addToCalendar() {
+    const url = manageUrl();
+    const ics = buildIcs({
+      uid: `${a.slot.id}@tonarino-te`,
+      title: eventTitle,
+      date: a.slot.date,
+      startTime: a.slot.startTime,
+      endTime: a.slot.endTime,
+      description: `担当者用の管理リンク（予定の確認・キャンセル）\n${url}\n共有カレンダーに入れると、ほかの人もこのリンクを開けます。`,
+      url,
+    });
+    const href = URL.createObjectURL(
+      new Blob([ics], { type: "text/calendar;charset=utf-8" }),
+    );
+    const link = document.createElement("a");
+    link.href = href;
+    link.download = "tonarino-te.ics";
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(href), 1000);
+    setMessage("カレンダー用のファイルを作成しました");
+  }
+  return (
+    <section className="save-link" aria-labelledby="save-link-title">
+      <div className="save-link-heading">
+        <Link2 size={20} aria-hidden="true" />
+        <div>
+          <h2 id="save-link-title">
+            {isNew
+              ? "この画面のリンクを、いま保存してください"
+              : "この画面のリンクを保存しておきましょう"}
+          </h2>
+          <p>
+            予定の確認とキャンセルは、このリンクからだけできます。
+            {emailEnabled
+              ? "メールを入力した場合は確認メールでもお知らせします。"
+              : "確認メールはまだ届きません。"}
+          </p>
+        </div>
+      </div>
+      <button className="button line-button full" onClick={sendToLine}>
+        <MessageCircle size={18} />
+        LINEで自分に送る
+      </button>
+      <p className="save-link-hint">
+        LINEの「Keepメモ」に送ると、自分だけが見られます。
+      </p>
+      <div className="save-link-actions">
+        <button className="button secondary" onClick={copy}>
+          {message === "リンクをコピーしました" ? (
+            <Check size={16} />
+          ) : (
+            <Copy size={16} />
+          )}
+          リンクをコピー
+        </button>
+        <button className="button secondary" onClick={addToCalendar}>
+          <CalendarPlus size={16} />
+          カレンダーに追加
+        </button>
+      </div>
+      <p className="status-message" role="status">
+        {message}
+      </p>
+    </section>
   );
 }

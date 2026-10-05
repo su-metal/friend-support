@@ -95,7 +95,7 @@ export default function Home() {
           <div className="hero-visual">
             <div className="visual-dot dot-one" />
             <div className="visual-dot dot-two" />
-            <div className="hero-paper">
+            <div className="hero-paper" aria-hidden="true">
               <div className="paper-top">
                 <span className="mini-brand">
                   <HandMark />

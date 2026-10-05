@@ -17,6 +17,8 @@ import { canAssign, dateLabel, fillStats, isPageClosed } from "@/lib/domain";
 import type { PublicSupportPage, SupportSlot } from "@/types/domain";
 import { Modal, ErrorMessage, postJson } from "./ui";
 import { track, TrackView } from "./analytics";
+// 予定が少ないときは絞り込みを出さず、一覧だけを見せる。
+const FILTER_MIN_SLOTS = 5;
 export function SupportPageView({
   page,
   sample = false,
@@ -30,7 +32,9 @@ export function SupportPageView({
     [onlyOpen, setOnlyOpen] = useState(false),
     [selected, setSelected] = useState<SupportSlot | null>(null);
   const stats = fillStats(page.slots),
-    closed = isPageClosed(page);
+    closed = isPageClosed(page),
+    assignable = page.slots.filter((s) => canAssign(page, s)).length,
+    showFilters = page.slots.length > FILTER_MIN_SLOTS;
   const slots = page.slots.filter(
     (s) =>
       (category === "all" || s.categoryId === category) &&
@@ -74,15 +78,19 @@ export function SupportPageView({
             </p>
           )}
           <div className="support-progress">
-            <div className="row between">
-              <p>
-                <strong>
-                  {stats.total}件中{stats.filled}件
-                </strong>
-                の担当が決まりました
-              </p>
-              <span>{stats.percent}%</span>
-            </div>
+            <p className="support-progress-lead">
+              {closed ? (
+                <>
+                  <strong>{stats.filled}件</strong>のサポートが集まりました
+                </>
+              ) : assignable > 0 ? (
+                <>
+                  手伝える予定が<strong>あと{assignable}件</strong>あります
+                </>
+              ) : (
+                "すべての予定に担当が決まりました"
+              )}
+            </p>
             <div
               className="progress-track"
               role="progressbar"
@@ -93,10 +101,12 @@ export function SupportPageView({
             >
               <span style={{ width: `${stats.percent}%` }} />
             </div>
-            <div className="row between small muted">
-              <span>あなたにできる予定を、ひとつから。</span>
-              <span>募集中 {stats.open}件</span>
-            </div>
+            <p className="support-progress-note">
+              {stats.total}件中{stats.filled}件の担当が決まりました。
+              {!closed &&
+                assignable > 0 &&
+                "できる予定をひとつ選んでください。"}
+            </p>
           </div>
         </div>
       </div>
@@ -126,39 +136,48 @@ export function SupportPageView({
           <>
             <div className="schedule-heading">
               <h2>サポートの予定</h2>
-              <span className="small muted">支援する方の登録は不要です</span>
+              <span className="small muted">
+                登録は名前だけ・アカウント不要
+              </span>
             </div>
-            <div className="filters">
-              <div className="category-filters" aria-label="カテゴリで絞り込む">
-                <button
-                  className={category === "all" ? "active" : ""}
-                  aria-pressed={category === "all"}
-                  onClick={() => setCategory("all")}
+            {showFilters && (
+              <div className="filters">
+                <div
+                  className="category-filters"
+                  aria-label="カテゴリで絞り込む"
                 >
-                  すべて
-                </button>
-                {categories
-                  .filter((c) => page.slots.some((s) => s.categoryId === c.id))
-                  .map((c) => (
-                    <button
-                      key={c.id}
-                      aria-pressed={category === c.id}
-                      className={category === c.id ? "active" : ""}
-                      onClick={() => setCategory(c.id)}
-                    >
-                      {c.icon} {c.name}
-                    </button>
-                  ))}
+                  <button
+                    className={category === "all" ? "active" : ""}
+                    aria-pressed={category === "all"}
+                    onClick={() => setCategory("all")}
+                  >
+                    すべて
+                  </button>
+                  {categories
+                    .filter((c) =>
+                      page.slots.some((s) => s.categoryId === c.id),
+                    )
+                    .map((c) => (
+                      <button
+                        key={c.id}
+                        aria-pressed={category === c.id}
+                        className={category === c.id ? "active" : ""}
+                        onClick={() => setCategory(c.id)}
+                      >
+                        {c.icon} {c.name}
+                      </button>
+                    ))}
+                </div>
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={onlyOpen}
+                    onChange={(e) => setOnlyOpen(e.target.checked)}
+                  />
+                  募集中の予定だけ
+                </label>
               </div>
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={onlyOpen}
-                  onChange={(e) => setOnlyOpen(e.target.checked)}
-                />
-                募集中の予定だけ
-              </label>
-            </div>
+            )}
           </>
         )}
         <div className="timeline">
@@ -254,11 +273,9 @@ export function SupportPageView({
           <ShieldCheck size={22} />
           <div>
             <strong>
-              このページは、身近な人とのサポートのためのものです。
+              住所などの詳しい案内は、担当が決まった人にだけ表示されます。
             </strong>
-            <p>
-              詳しい受け渡し方法は担当確定後に表示されます。共有リンクは、ご本人の了承を得た範囲でお使いください。
-            </p>
+            <p>共有リンクは、ご本人の了承を得た範囲でお使いください。</p>
           </div>
         </div>
         <div className="support-bottom">
@@ -367,9 +384,7 @@ function AssignmentForm({
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-        <p className="field-hint">
-          お名前は、このページでほかの参加者にも表示されます。
-        </p>
+        <p className="field-hint">ページを見る人に表示されます。</p>
       </div>
       <div className="field">
         <label htmlFor="supporter-email">メールアドレス（任意）</label>
@@ -378,20 +393,18 @@ function AssignmentForm({
           type="email"
           autoComplete="email"
           maxLength={254}
-          placeholder="確認とリマインドを受け取りたい方"
+          placeholder="name@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
         <p className="field-hint">
           {emailEnabled || sample
             ? "担当確認と前日・当日の通知に使います。共有ページには表示されません。"
-            : "通知メールは準備中です。入力したアドレスは主催者にだけ表示されます。管理リンクを保存して予定をご確認ください。"}
+            : "主催者にだけ表示されます。確認メールは準備中です。"}
         </p>
       </div>
       <div className="field">
-        <label htmlFor="supporter-message">
-          ひとこと（任意・主催者だけに表示）
-        </label>
+        <label htmlFor="supporter-message">主催者へのひとこと（任意）</label>
         <textarea
           id="supporter-message"
           rows={2}
@@ -407,11 +420,11 @@ function AssignmentForm({
           ? "担当を確定しています…"
           : sample
             ? "見本で担当登録を試す"
-            : "この予定を担当する"}
+            : "担当を決める"}
         <ArrowRight size={17} />
       </button>
       <p className="field-hint center">
-        アカウント登録は不要です。予定が変わったらキャンセルできます。
+        アカウント登録は不要です。あとからキャンセルもできます。
       </p>
     </form>
   );

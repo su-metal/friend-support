@@ -312,7 +312,7 @@ strong {
 }
 .brand-sub {
   display: block;
-  font-size: 8px;
+  font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.09em;
   margin-top: 6px;
@@ -363,7 +363,7 @@ strong {
 }
 .cta-note {
   margin-top: 12px;
-  font-size: 10px;
+  font-size: 12px;
   display: flex;
   align-items: center;
   gap: 7px;
@@ -543,7 +543,7 @@ strong {
   border: 1px solid #f0e2ce;
   border-radius: 8px;
   box-shadow: 0 6px 20px #33221406;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.8;
 }
 .note-heart {
@@ -554,7 +554,7 @@ strong {
 }
 .visual-caption {
   position: absolute;
-  font-size: 9px;
+  font-size: 11px;
   right: 16px;
   bottom: 10px;
   color: #7f8d81;
@@ -588,7 +588,7 @@ strong {
   padding-block: 23px;
 }
 .category-strip p {
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.8;
   flex-shrink: 0;
   color: var(--muted);
@@ -634,6 +634,7 @@ strong {
 }
 .step-number {
   position: absolute;
+  z-index: 1;
   top: 0;
   left: 20%;
   font-family: Georgia, serif;
@@ -687,7 +688,7 @@ strong {
 .steps p {
   margin-top: 12px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 2.1;
 }
 .story-section {
@@ -736,7 +737,7 @@ strong {
 }
 .assurance p {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 2;
   margin-top: 11px;
 }
@@ -796,15 +797,15 @@ strong {
   height: 31px;
 }
 .footer-inner > p {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted);
 }
 .footer-inner .row {
-  font-size: 10px;
+  font-size: 11px;
   gap: 20px;
 }
 .copyright {
-  font-size: 9px;
+  font-size: 11px;
   color: #8c968e;
   text-align: right;
   padding-top: 22px;
@@ -849,7 +850,7 @@ strong {
   margin-bottom: 20px;
 }
 .auth-footnote {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted);
   margin-top: 22px;
 }
@@ -884,11 +885,14 @@ strong {
 }
 .field-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 18px;
 }
+.field-grid > .field {
+  min-width: 0;
+}
 .field-hint {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
   margin-top: 7px;
   line-height: 1.8;
@@ -955,7 +959,7 @@ strong {
   font-size: 12px;
 }
 .wizard-progress li small {
-  font-size: 10px;
+  font-size: 11px;
 }
 .wizard-progress li.current {
   color: var(--sage);
@@ -995,7 +999,7 @@ strong {
   padding: 16px 18px;
   border-radius: 8px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.9;
 }
 .gentle-note strong {
@@ -1050,7 +1054,7 @@ strong {
   font-size: 13px;
 }
 .draft-slot p {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
 }
 .category-icon {
@@ -1101,7 +1105,7 @@ strong {
 }
 .preview-slots small {
   display: block;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
 }
 .checkbox-label {
@@ -1248,13 +1252,18 @@ strong {
   padding: 18px 22px;
   margin-top: 28px;
 }
-.support-progress > .row:first-child {
-  font-size: 11px;
-}
-.support-progress > .row:first-child > span {
-  color: var(--sage);
-  font-size: 17px;
+.support-progress-lead {
+  font-size: 15px;
   font-weight: 650;
+}
+.support-progress-lead strong {
+  color: var(--sage-dark);
+  font-size: 21px;
+  margin: 0 4px;
+}
+.support-progress-note {
+  font-size: 12px;
+  color: var(--muted);
 }
 .progress-track {
   height: 6px;
@@ -1375,7 +1384,7 @@ strong {
   min-width: 0;
 }
 .slot-category {
-  font-size: 9px;
+  font-size: 11px;
   color: var(--muted);
 }
 .slot-main h4 {
@@ -1383,7 +1392,7 @@ strong {
   line-height: 1.55;
 }
 .slot-time {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
   display: flex;
   align-items: center;
@@ -1391,7 +1400,7 @@ strong {
   margin-top: 5px;
 }
 .slot-description {
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 11px;
   color: var(--muted);
   line-height: 1.85;
@@ -1402,7 +1411,7 @@ strong {
   display: flex;
   gap: 5px;
   align-items: center;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted);
   margin-top: 9px;
 }
@@ -1425,17 +1434,16 @@ strong {
 }
 .slot-cta {
   align-self: center;
-  padding: 10px 14px;
-  font-size: 11px;
-  min-height: 42px;
-  border-color: #c6d4c8;
-  background: var(--light-sage);
-  color: var(--sage);
+  padding: 10px 18px;
+  font-size: 13px;
+  min-height: 46px;
+  background: var(--sage-dark);
+  color: #fff;
   white-space: nowrap;
   gap: 9px;
 }
 .slot-cta:hover {
-  background: #e4ecdf;
+  background: var(--ink);
 }
 .support-privacy {
   display: flex;
@@ -1451,10 +1459,10 @@ strong {
   color: var(--sage);
 }
 .support-privacy strong {
-  font-size: 11px;
+  font-size: 12px;
 }
 .support-privacy p {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted);
   margin-top: 6px;
   line-height: 1.9;
@@ -1469,7 +1477,7 @@ strong {
   color: var(--sage);
 }
 .support-bottom p {
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 13px;
   line-height: 2.1;
 }
@@ -1485,7 +1493,7 @@ strong {
   font-size: 16px;
 }
 .assignment-summary p {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
   margin-top: 4px;
 }
@@ -1503,7 +1511,7 @@ strong {
 }
 .sample-notice p,
 .success-notice p {
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 3px;
 }
 .sample-complete {
@@ -1558,6 +1566,53 @@ strong {
   color: var(--muted);
   margin-top: 12px;
 }
+.save-link {
+  border: 2px solid var(--coral);
+  border-radius: 12px;
+  background: #fdf8f3;
+  padding: 20px;
+  margin-top: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.save-link-heading {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.save-link-heading > svg {
+  flex-shrink: 0;
+  margin-top: 4px;
+  color: #9a5d40;
+}
+.save-link-heading h2 {
+  font-size: 15px;
+}
+.save-link-heading p {
+  font-size: 12px;
+  color: #4f5f5a;
+  margin-top: 2px;
+}
+.save-link-hint {
+  font-size: 12px;
+  color: #4f5f5a;
+  text-align: center;
+  margin-top: -4px;
+}
+.save-link-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+}
+.save-link-actions .button {
+  padding: 10px 8px;
+  gap: 6px;
+  font-size: 12px;
+}
+.save-link .status-message:empty {
+  display: none;
+}
 .manage-card {
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -1591,7 +1646,7 @@ strong {
   display: grid;
   grid-template-columns: 115px 1fr;
   gap: 10px 13px;
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 21px;
 }
 .private-details dt {
@@ -1603,7 +1658,7 @@ strong {
   overflow-wrap: anywhere;
 }
 .private-details > .field-hint {
-  font-size: 10px;
+  font-size: 12px;
   margin-top: 22px;
 }
 .cancel-link {
@@ -1623,7 +1678,7 @@ strong {
   align-items: center;
   gap: 17px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
   margin-bottom: 26px;
 }
 .dashboard-heading {
@@ -1728,7 +1783,7 @@ strong {
   font-size: 18px;
 }
 .dashboard-share > .muted {
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 8px;
 }
 .dashboard-share > .button {
@@ -1757,7 +1812,7 @@ strong {
   color: var(--muted);
 }
 .status-message {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--sage);
   min-height: 18px;
   margin-top: 5px;
@@ -1811,7 +1866,7 @@ strong {
   font-size: 12px;
 }
 .organizer-assignment p {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
   overflow-wrap: anywhere;
 }
@@ -1830,8 +1885,13 @@ strong {
   align-items: center;
   flex-shrink: 0;
 }
+.slot-complete-note {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
 .small-button {
-  font-size: 10px;
+  font-size: 11px;
   min-height: 34px;
   padding: 6px 11px;
   gap: 6px;
@@ -2036,7 +2096,7 @@ strong {
 .guide-index-privacy p {
   margin-top: 5px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.9;
 }
 .guide-index-privacy {
@@ -2095,7 +2155,7 @@ strong {
   margin: 13px 0 0;
   padding-left: 21px;
   color: var(--sage);
-  font-size: 11px;
+  font-size: 12px;
 }
 .guide-toc a:hover {
   text-decoration: underline;
@@ -2241,7 +2301,7 @@ strong {
     gap: 8px;
   }
   .brand-sub {
-    font-size: 7px;
+    font-size: 11px;
   }
   .brand-icon {
     width: 33px;
@@ -2268,7 +2328,7 @@ strong {
     margin-top: 16px;
   }
   .hero .eyebrow {
-    font-size: 10px;
+    font-size: 11px;
   }
   .hero-description {
     font-size: 12px;
@@ -2281,7 +2341,7 @@ strong {
     min-height: 51px;
   }
   .cta-note {
-    font-size: 9px;
+    font-size: 12px;
   }
   .hero-visual {
     max-width: 405px;
@@ -2324,11 +2384,11 @@ strong {
   .hero-note {
     bottom: 20px;
     left: 3px;
-    font-size: 10px;
+    font-size: 12px;
     padding: 10px 17px;
   }
   .visual-caption {
-    font-size: 8px;
+    font-size: 11px;
     bottom: 7px;
     right: 7px;
   }
@@ -2342,7 +2402,7 @@ strong {
     padding-block: 19px;
   }
   .category-strip p {
-    font-size: 10px;
+    font-size: 12px;
   }
   .category-strip p br {
     display: none;
@@ -2364,11 +2424,11 @@ strong {
     line-height: 1.65;
   }
   .section-heading > p:last-child {
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.9;
   }
   .section-heading .eyebrow {
-    font-size: 10px;
+    font-size: 11px;
   }
   .steps {
     grid-template-columns: 1fr;
@@ -2382,9 +2442,10 @@ strong {
     gap: 2px 20px;
   }
   .step-number {
-    left: -2px;
-    top: -7px;
+    left: -8px;
+    top: -12px;
     font-size: 22px;
+    line-height: 1;
   }
   .step-art {
     grid-row: 1/3;
@@ -2400,7 +2461,7 @@ strong {
     align-self: end;
   }
   .steps p {
-    font-size: 10px;
+    font-size: 12px;
     margin-top: 5px;
     line-height: 1.9;
   }
@@ -2434,7 +2495,7 @@ strong {
     font-size: 17px;
   }
   .assurance p {
-    font-size: 10px;
+    font-size: 12px;
   }
   .assurance-list {
     margin-top: 23px;
@@ -2442,7 +2503,7 @@ strong {
     border-top: 1px solid var(--line);
   }
   .assurance-list p {
-    font-size: 11px;
+    font-size: 12px;
   }
   .closing-cta {
     padding: 38px 0 43px;
@@ -2451,7 +2512,7 @@ strong {
     font-size: 22px;
   }
   .closing-cta p {
-    font-size: 11px;
+    font-size: 12px;
   }
   .closing-cta .button {
     padding-inline: 16px;
@@ -2470,7 +2531,7 @@ strong {
   }
   .copyright {
     text-align: left;
-    font-size: 8px;
+    font-size: 11px;
   }
   .site-footer {
     padding-top: 28px;
@@ -2485,7 +2546,7 @@ strong {
     font-size: 21px;
   }
   .auth-footnote {
-    font-size: 9px;
+    font-size: 12px;
   }
   .form-page {
     padding-block: 25px 42px;
@@ -2503,7 +2564,7 @@ strong {
     padding-inline: 5px;
   }
   .wizard-progress li small {
-    font-size: 9px;
+    font-size: 11px;
   }
   .wizard-card {
     padding: 25px 21px;
@@ -2512,7 +2573,7 @@ strong {
     font-size: 20px;
   }
   .wizard-card > .muted {
-    font-size: 11px;
+    font-size: 12px;
   }
   .field-grid {
     gap: 10px;
@@ -2552,7 +2613,7 @@ strong {
     font-size: 12px;
   }
   .draft-slot p {
-    font-size: 10px;
+    font-size: 12px;
   }
   .draft-slot .category-icon {
     font-size: 22px;
@@ -2569,7 +2630,7 @@ strong {
   }
   .preview-slots .tag {
     padding: 3px 6px;
-    font-size: 9px;
+    font-size: 11px;
   }
   .preview-slots strong {
     font-size: 11px;
@@ -2605,25 +2666,25 @@ strong {
     font-size: 22px;
   }
   .period {
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.85;
   }
   .support-description {
-    font-size: 11px;
+    font-size: 12px;
     margin-top: 21px;
   }
   .support-progress {
     padding: 15px 16px;
     margin-top: 22px;
   }
-  .support-progress > .row:first-child {
-    font-size: 10px;
+  .support-progress-lead {
+    font-size: 14px;
   }
-  .support-progress > .row.small {
-    font-size: 9px;
+  .support-progress-lead strong {
+    font-size: 19px;
   }
-  .support-progress > .row:first-child > span {
-    font-size: 16px;
+  .support-progress-note {
+    font-size: 12px;
   }
   .support-body {
     padding-top: 25px;
@@ -2632,18 +2693,18 @@ strong {
     font-size: 18px;
   }
   .schedule-heading > .small {
-    font-size: 9px;
+    font-size: 11px;
   }
   .category-filters {
     gap: 6px;
   }
   .category-filters > button {
     padding: 6px 11px;
-    font-size: 10px;
+    font-size: 11px;
     min-height: 34px;
   }
   .filters > .checkbox-label {
-    font-size: 10px;
+    font-size: 11px;
   }
   .timeline {
     margin-top: 25px;
@@ -2672,27 +2733,27 @@ strong {
     font-size: 15px;
   }
   .slot-category {
-    font-size: 9px;
+    font-size: 11px;
   }
   .slot-time {
-    font-size: 10px;
+    font-size: 12px;
   }
   .slot-description {
-    font-size: 10px;
+    font-size: 12px;
     margin-top: 9px;
   }
   .location-summary {
-    font-size: 9px;
+    font-size: 12px;
   }
   .slot-status {
-    font-size: 10px;
+    font-size: 11px;
     margin-top: 10px;
   }
   .slot-cta {
     width: 100%;
     margin-top: 3px;
-    min-height: 43px;
-    font-size: 12px;
+    min-height: 48px;
+    font-size: 14px;
     justify-content: center;
   }
   .support-privacy {
@@ -2700,22 +2761,22 @@ strong {
     gap: 10px;
   }
   .support-privacy strong {
-    font-size: 10px;
+    font-size: 12px;
   }
   .support-privacy p {
-    font-size: 9px;
+    font-size: 12px;
   }
   .support-privacy > svg {
     width: 19px;
   }
   .support-bottom p {
-    font-size: 10px;
+    font-size: 12px;
   }
   .assignment-summary strong {
     font-size: 14px;
   }
   .assignment-summary p {
-    font-size: 10px;
+    font-size: 12px;
   }
   .manage-wrap {
     margin-top: 30px;
@@ -2734,19 +2795,19 @@ strong {
     padding: 18px;
   }
   .private-details > p {
-    font-size: 11px;
+    font-size: 12px;
   }
   .private-details dl {
     grid-template-columns: 100px 1fr;
     gap: 9px 10px;
-    font-size: 10px;
+    font-size: 12px;
   }
   .dashboard-container {
     padding-block: 24px 45px;
   }
   .account-bar {
     justify-content: space-between;
-    font-size: 9px;
+    font-size: 11px;
     gap: 10px;
   }
   .dashboard-heading {
@@ -2759,7 +2820,7 @@ strong {
     font-size: 23px;
   }
   .dashboard-heading .eyebrow {
-    font-size: 9px;
+    font-size: 11px;
   }
   .dashboard-pages {
     grid-template-columns: 1fr;
@@ -2774,7 +2835,7 @@ strong {
     margin-top: 17px;
   }
   .dashboard-page-card .period {
-    font-size: 10px;
+    font-size: 12px;
   }
   .dashboard-page-card > .row:last-of-type {
     font-size: 11px;
@@ -2810,30 +2871,30 @@ strong {
     font-size: 28px;
   }
   .stat span {
-    font-size: 10px;
+    font-size: 11px;
   }
   .dashboard-share h2 {
     font-size: 17px;
   }
   .dashboard-share > .muted {
-    font-size: 10px;
+    font-size: 12px;
   }
   .share-box .row {
     gap: 8px;
   }
   .share-box .button {
     padding: 10px 12px;
-    font-size: 10px;
+    font-size: 11px;
     gap: 7px;
   }
   .share-url {
-    font-size: 10px;
+    font-size: 11px;
   }
   .organizer-schedule > .row > h2 {
     font-size: 17px;
   }
   .organizer-schedule > .row > .button {
-    font-size: 10px;
+    font-size: 11px;
     min-height: 39px;
     padding: 9px 12px;
     gap: 7px;
@@ -2848,10 +2909,10 @@ strong {
     font-size: 14px;
   }
   .organizer-slot-top small {
-    font-size: 10px;
+    font-size: 11px;
   }
   .organizer-slot-top .tag {
-    font-size: 9px;
+    font-size: 11px;
     padding: 3px 7px;
     white-space: nowrap;
   }
@@ -2863,10 +2924,10 @@ strong {
   }
   .success-notice {
     padding: 15px;
-    font-size: 11px;
+    font-size: 12px;
   }
   .success-notice p {
-    font-size: 10px;
+    font-size: 12px;
   }
   .legal-page {
     padding-block: 35px 55px;
@@ -2887,7 +2948,7 @@ strong {
     font-size: 26px;
   }
   .guide-index-hero > .container > p:not(.eyebrow) {
-    font-size: 11px;
+    font-size: 12px;
   }
   .guide-index-content {
     padding-block: 39px 52px;
@@ -2912,7 +2973,7 @@ strong {
     font-size: 16px;
   }
   .guide-card-copy > p:not(.guide-label) {
-    font-size: 10px;
+    font-size: 12px;
   }
   .guide-index-note,
   .guide-index-privacy,
@@ -2929,7 +2990,7 @@ strong {
   .guide-index-privacy p,
   .guide-safety-note p,
   .guide-product-note p {
-    font-size: 10px;
+    font-size: 12px;
   }
   .guide-article-wrap {
     padding: 22px 20px 50px;
@@ -2947,7 +3008,7 @@ strong {
     padding: 17px;
   }
   .guide-toc ol {
-    font-size: 10px;
+    font-size: 12px;
   }
   .guide-step {
     grid-template-columns: 34px minmax(0, 1fr);
@@ -2957,13 +3018,13 @@ strong {
   .guide-step-number {
     width: 32px;
     height: 32px;
-    font-size: 10px;
+    font-size: 12px;
   }
   .guide-step h2 {
     font-size: 14px;
   }
   .guide-step p {
-    font-size: 10px;
+    font-size: 12px;
   }
   .guide-product-note {
     padding: 19px 16px;
