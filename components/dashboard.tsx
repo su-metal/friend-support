@@ -12,12 +12,14 @@ import {
   LogOut,
   Ellipsis,
   Trash2,
+  Bell,
 } from "lucide-react";
 import type { OrganizerPage } from "@/types/domain";
 import { categories } from "@/config/product";
 import { fillStats, dateLabel, isPageClosed, todayJst } from "@/lib/domain";
 import { ErrorMessage, postJson, requestJson, Modal } from "./ui";
 import { ShareButtons } from "./share";
+import { RecipientPanel } from "./recipient-panel";
 export function AccountSignOut() {
   const router = useRouter();
   return (
@@ -106,10 +108,12 @@ export function DashboardDetail({
   page,
   publicUrl,
   justPublished,
+  recipientEnabled = false,
 }: {
   page: OrganizerPage;
   publicUrl: string;
   justPublished: boolean;
+  recipientEnabled?: boolean;
 }) {
   const router = useRouter(),
     [error, setError] = useState(""),
@@ -121,7 +125,13 @@ export function DashboardDetail({
     [menuOpen, setMenuOpen] = useState(false);
   const stats = fillStats(page.slots),
     closed = isPageClosed(page),
-    today = todayJst();
+    today = todayJst(),
+    recipientOpen = page.slots.filter(
+      (s) =>
+        page.recipientSlotIds.includes(s.id) &&
+        s.status === "open" &&
+        s.date >= today,
+    ).length;
   async function changeStatus(status: string) {
     setBusy(true);
     setError("");
@@ -222,6 +232,15 @@ export function DashboardDetail({
         </div>
       </div>
       <ErrorMessage message={error} />
+      {recipientEnabled && recipientOpen > 0 && !closed && (
+        <div className="recipient-notice" role="status">
+          <Bell size={18} />
+          <p>
+            {page.recipientDisplayName}
+            が出したお願いのうち、{recipientOpen}件が募集中です。
+          </p>
+        </div>
+      )}
       <div className="dashboard-summary">
         <div>
           <p className="muted small">みんなのサポート状況</p>
@@ -270,6 +289,7 @@ export function DashboardDetail({
           <ShareButtons url={publicUrl} title={page.title} pageId={page.id} />
         </div>
       )}
+      {recipientEnabled && !closed && <RecipientPanel page={page} />}
       <section className="organizer-schedule">
         <div className="row between wrap">
           <h2>サポート予定と担当</h2>
@@ -311,6 +331,9 @@ export function DashboardDetail({
                         : "担当確定"}
                   </span>
                 </div>
+                {page.recipientSlotIds.includes(s.id) && (
+                  <span className="tag tag-recipient">ご本人のお願い</span>
+                )}
                 {a && (
                   <div className="organizer-assignment">
                     <span className="avatar">

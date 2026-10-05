@@ -35,6 +35,10 @@ export interface PageDocument extends SupportPage {
   slotIds: string[];
   organizerEmail: string;
   deletionRequestedAt?: string;
+  // 予定一覧を変えるたびに増やす。古い画面からの保存で予定を消さないため。
+  revision?: number;
+  recipientTokenHash?: string;
+  recipientSlotIds?: string[];
 }
 interface PageSecret {
   passcodeHash: string;
@@ -59,10 +63,10 @@ export interface NotificationDocument {
   leaseId?: string;
   sentAt?: string;
 }
-function now() {
+export function now() {
   return new Date().toISOString();
 }
-function publicFields(p: SupportPage): Omit<PublicSupportPage, "slots"> {
+export function publicFields(p: SupportPage): Omit<PublicSupportPage, "slots"> {
   return {
     id: p.id,
     slug: p.slug,
@@ -77,11 +81,17 @@ function publicFields(p: SupportPage): Omit<PublicSupportPage, "slots"> {
     plan: p.plan,
     visibility: p.visibility,
     thanksMessage: p.thanksMessage,
+    ...(p.pausedAt ? { pausedAt: p.pausedAt } : {}),
+    considerations: p.considerations ?? [],
     createdAt: p.createdAt,
     updatedAt: p.updatedAt,
   };
 }
-async function owned(tx: Pick<Transaction, "get">, user: User, id: string) {
+export async function owned(
+  tx: Pick<Transaction, "get">,
+  user: User,
+  id: string,
+) {
   const p = await tx.get<PageDocument>(`support_pages/${id}`);
   if (!p || p.deletionRequestedAt || p.organizerId !== user.id)
     throw new AppError("not_found", "ページが見つかりません", 404);
@@ -109,7 +119,7 @@ async function pageBySlug(
   }
   return p;
 }
-async function notification(
+export async function notification(
   input: Omit<NotificationDocument, "status" | "attempts" | "encryptedText"> & {
     text: string;
   },
@@ -148,6 +158,9 @@ export class SupportService
         return s ? [{ ...s, privateInstructions: "" }] : [];
       }),
       assignments: [],
+      revision: p.revision ?? 0,
+      recipientLinkActive: !!p.recipientTokenHash,
+      recipientSlotIds: p.recipientSlotIds ?? [],
     }));
   }
   async organizerPage(user: User, id: string): Promise<OrganizerPage> {
@@ -189,6 +202,9 @@ export class SupportService
         status: a.status,
         createdAt: a.createdAt,
       })),
+      revision: p.revision ?? 0,
+      recipientLinkActive: !!p.recipientTokenHash,
+      recipientSlotIds: p.recipientSlotIds ?? [],
     };
   }
   async publicPage(
@@ -321,13 +337,19 @@ export class SupportService
         : {}),
     });
   }
-  async save(user: User, id: string, input: PageDraft) {
+  async save(user: User, id: string, input: PageDraft, baseRevision?: number) {
     const draft = pageDraftSchema.parse(input);
     const hash = draft.passcode ? await passcodeHash(draft.passcode) : "";
     await this.store.transaction(async (tx) => {
       const p = await owned(tx, user, id);
       if (["closed", "archived"].includes(p.status) || p.endDate < todayJst())
         throw new AppError("closed", "終了したページは編集できません");
+      if (baseRevision !== undefined && baseRevision !== (p.revision ?? 0))
+        throw new AppError(
+          "stale",
+          "ご本人がお願いを追加・取り消ししました。画面を読み込み直してから編集してください",
+          409,
+        );
       const old = await tx.getMany<SupportSlot>(
         p.slotIds.map((slotId) => `support_slots/${slotId}`),
       );
@@ -387,6 +409,10 @@ export class SupportService
         endDate: draft.endDate,
         visibility: draft.visibility,
         slotIds: slots.map((s) => s.id),
+        recipientSlotIds: (p.recipientSlotIds ?? []).filter((slotId) =>
+          slots.some((s) => s.id === slotId),
+        ),
+        revision: (p.revision ?? 0) + 1,
         updatedAt: stamp,
       });
       tx.set(`page_secrets/${id}`, {
@@ -660,6 +686,7 @@ export class SupportService
       "assignment_tokens",
       "slot_active_assignments",
       "page_members",
+      "recipient_tokens",
     ];
     const docs = await Promise.all(
       collections.map(async (collection) => ({

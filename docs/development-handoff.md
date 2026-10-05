@@ -1,6 +1,6 @@
 # 開発引き継ぎ：となりの手
 
-更新日：2026-10-04。Codex・Claude Code共通の作業記録。
+更新日：2026-10-05。Codex・Claude Code共通の作業記録。
 仕様は `docs/requirements_definition.md`、開発ルールは `AGENTS.md`。この記録だけから仕様・権限・外部設定の変更を判断しない。
 
 ## 現在の方針
@@ -9,6 +9,18 @@
 - Firebaseはsupport-circle-31a09、デプロイ先はCloudflare Workers。
 - 支援者は専用アカウント不要。主催者はFirebase Email Link。
 - LINEミニアプリ・ネイティブアプリとPhase 2〜6の利用機能は未提供。
+
+## ご本人用リンクの実装（2026-10-05）
+
+担当ツール：Claude Code（ブランチ `ccr-b9f57a4f-xvmywh`）。要件・設計・作業リストは `docs/tasks/recipient-access/`。ユーザーと方針5点を決め、5画面のモック（Design Artifact、非公開）に合意してから実装した。
+
+- 支援の始めは窓口役（主催者）が本人に確認して作り、途中からは本人も困りごと（体調不良で食事が作れない、おむつが足りない等）をお願いとして出せるようにした。機能フラグ `ENABLE_RECIPIENT_ACCESS`（既定OFF。`wrangler.jsonc`・`.env.example` もfalse）。
+- サービス：`services/recipient.ts`（発行・作り直し・無効化、表示、お願いの追加・取り消し、お休み・支援する方へのお願い）。トークンはハッシュだけを `recipient_tokens` に保存。ページに `revision`・`recipientTokenHash`・`recipientSlotIds`・`pausedAt`・`considerations` を追加（任意項目、移行不要）。`canAssign` にお休み条件を追加。主催者の保存は `baseRevision` 必須で、古い画面からの保存を409で拒否する。ページ削除で `recipient_tokens` も削除。
+- API：`/api/recipient/requests`・`withdraw`・`settings`（トークンは本文で送る、Origin検証・レート制限・Zod）。`PATCH /api/pages/[id]` に `recipient_link_issue`・`recipient_link_revoke`・`recipient_settings` を追加。フラグOFFでは404。
+- 画面：`/r/[token]`（noindex・no-store・robotsでdisallow、サイトマップ対象外）、ダッシュボードの本人用リンク欄・お休み・支援する方へのお願い・「ご本人のお願い」表示、公開ページのお休み表示・お願いの定型表示・買い物の立て替え注記。
+- 要件書（ご本人用リンク節、AC-12、提供範囲）、`AGENTS.md`、`docs/data-model.md`、`docs/extension-design.md` を更新。
+- ローカル検証：`npm run docs:check`、`typecheck`、`lint`、`test`（41件。本人用リンクのunit 13件を追加）、`test:db`（5件。本人の同時お願い2件の確定と古い画面からの保存拒否、`recipient_tokens` のRules拒否を追加）、`test:e2e`（8件。本人用リンクの流れを375/390/430pxで追加。LINE共有文と公開APIに非公開欄が出ないこと、お休み中に担当ボタンが出ないこと、無効化後に404を確認）、`build:cloudflare` すべて成功。375pxの撮影で横はみ出しなし。E2Eの設定で `ENABLE_RECIPIENT_ACCESS=true` にした。Playwrightは環境のChromiumを指定した一時設定で実行した（設定ファイルはコミットしていない）。
+- 未確認：実機（iPhone/Android）でのLINE起動と本人用ページの操作、通知メール（`EMAIL_FROM` 未設定のため未送信）。デプロイ、本番のフラグON、外部設定の変更はしていない。
 
 ## UIブラッシュアップ：文字サイズの底上げ（2026-10-04）
 
@@ -90,8 +102,8 @@
 | `npm run test:db`                    | Firestore Emulator起動後、3件通過・1件失敗。同時担当の後、キャンセル処理でFirestore RESTが409を返した。以前から再現性未確定の別課題で、今回DBコードは変更していない |
 | `npm run test:e2e`                   | 5件通過。主要導線3幅、CSRF/認証拒否、公開ガイドの375/390/430px・canonical・サイトマップを確認                                                                       |
 | `npm run build:cloudflare`           | Next.js production buildとOpenNext buildが通過。OpenNextのWindows対応に関する既存の警告あり                                                                         |
-| `npm run deploy`                     | 成功。本番Worker `friend-support`、Version ID `92545c44-84fd-4a86-b9fb-e1cbd56be21b`。`--keep-vars` で既存の変数・Secretsを保持。Cron `*/10 * * * *` も維持 |
-| 公開HTTPS確認                         | `/guides`、`/guides/coordinate-support`、`/sitemap.xml`、`/robots.txt` は200。canonicalとサイトマップの公開先を確認。`/api/email-test` は404                 |
+| `npm run deploy`                     | 成功。本番Worker `friend-support`、Version ID `92545c44-84fd-4a86-b9fb-e1cbd56be21b`。`--keep-vars` で既存の変数・Secretsを保持。Cron `*/10 * * * *` も維持         |
+| 公開HTTPS確認                        | `/guides`、`/guides/coordinate-support`、`/sitemap.xml`、`/robots.txt` は200。canonicalとサイトマップの公開先を確認。`/api/email-test` は404                        |
 | Claude Code                          | `claude --version` で2.1.52を確認。CLAUDE.mdのインポート構造は検査済み。実際の開発セッションでの読み込みは未確認                                                    |
 
 Firestore CLIはユーザーフォルダーのconfigstore読み取りがEPERMで失敗したため、この実行では `XDG_CONFIG_HOME` を `.local-test-tools/config` に設定した。CLIのMOTD取得警告は出たが、エミュレーターは起動した。ブラウザーからの直接書き込みに対するPERMISSION_DENIEDはRules拒否テストの期待結果。
@@ -106,12 +118,13 @@ Firestore CLIはユーザーフォルダーのconfigstore読み取りがEPERMで
 
 ## 残作業と次に必要な情報
 
-| 順番 | 残作業                                   | 状態・必要な情報                                                                                                   |
-| ---- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| 1    | Firebaseログインメールの実受信からの操作 | 管理API発行リンクによる認証確認とは別に、本人が `/login` からメールを受信してリンクを開く操作が未確認              |
-| 2    | 支援通知メールの本番有効化               | 単発テストメールの受信確認済み。`EMAIL_FROM` が未設定なので支援通知はOFF。送信待ちoutboxを確認した上で有効化を判断 |
-| 3    | 検索・SNS・施設からの集客                | 公開案内・支援ガイド・サイトマップは本番公開済み。検索結果への登録、紹介施策と獲得効果は未確認                         |
-| 4    | ページ単位のPlus課金の検証               | 未着手。支払意思・価格・有料機能を検証し、Phase 2で実装する。現時点のフラグはOFF                                   |
+| 順番 | 残作業                                   | 状態・必要な情報                                                                                                      |
+| ---- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| 1    | Firebaseログインメールの実受信からの操作 | 管理API発行リンクによる認証確認とは別に、本人が `/login` からメールを受信してリンクを開く操作が未確認                 |
+| 2    | 支援通知メールの本番有効化               | 単発テストメールの受信確認済み。`EMAIL_FROM` が未設定なので支援通知はOFF。送信待ちoutboxを確認した上で有効化を判断    |
+| 3    | 検索・SNS・施設からの集客                | 公開案内・支援ガイド・サイトマップは本番公開済み。検索結果への登録、紹介施策と獲得効果は未確認                        |
+| 4    | ご本人用リンクの公開                     | 実装・ローカル検証済み、フラグ既定OFF。実機でのLINE起動と操作確認のあと、本番のフラグONとデプロイをユーザーに確認する |
+| 5    | ページ単位のPlus課金の検証               | 未着手。支払意思・価格・有料機能を検証し、Phase 2で実装する。現時点のフラグはOFF                                      |
 
 一時メールテスト経路は削除済み。今回のデプロイではFirebase設定とSecretsを変更していない。通常の支援通知は `EMAIL_FROM` 未設定のためOFF。公開ガイド変更は本番Workerへ反映済み。
 

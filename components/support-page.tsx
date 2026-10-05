@@ -12,7 +12,7 @@ import {
   Heart,
   Info,
 } from "lucide-react";
-import { categories } from "@/config/product";
+import { categories, considerationOptions } from "@/config/product";
 import { canAssign, dateLabel, fillStats, isPageClosed } from "@/lib/domain";
 import type { PublicSupportPage, SupportSlot } from "@/types/domain";
 import { Modal, ErrorMessage, postJson } from "./ui";
@@ -33,6 +33,10 @@ export function SupportPageView({
     [selected, setSelected] = useState<SupportSlot | null>(null);
   const stats = fillStats(page.slots),
     closed = isPageClosed(page),
+    paused = !!page.pausedAt && !closed,
+    considerations = considerationOptions.filter((o) =>
+      (page.considerations ?? []).includes(o.id),
+    ),
     assignable = page.slots.filter((s) => canAssign(page, s)).length,
     showFilters = page.slots.length > FILTER_MIN_SLOTS;
   const slots = page.slots.filter(
@@ -83,6 +87,8 @@ export function SupportPageView({
                 <>
                   <strong>{stats.filled}件</strong>のサポートが集まりました
                 </>
+              ) : paused ? (
+                "ただいまお休み中です"
               ) : assignable > 0 ? (
                 <>
                   手伝える予定が<strong>あと{assignable}件</strong>あります
@@ -119,6 +125,27 @@ export function SupportPageView({
               <p>担当ボタンから入力の流れを見られます。</p>
             </div>
           </div>
+        )}
+        {paused && (
+          <div className="paused-notice" role="status">
+            <strong>ただいまお休み中です</strong>
+            <p>
+              新しい担当の受付を止めています。決まっている予定はそのままです。
+            </p>
+          </div>
+        )}
+        {!closed && considerations.length > 0 && (
+          <section className="considerations">
+            <h2>支援する方へのお願い</h2>
+            <ul>
+              {considerations.map((o) => (
+                <li key={o.id}>
+                  <Check size={15} />
+                  {o.label}
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
         {closed ? (
           <div className="closed-message">
@@ -229,6 +256,11 @@ export function SupportPageView({
                             {s.locationSummary}
                           </p>
                         )}
+                        {s.categoryId === "shopping" && s.status === "open" && (
+                          <p className="slot-description">
+                            立て替えたお代は、ご本人やページを作った方と直接やり取りしてください。
+                          </p>
+                        )}
                         <span className={`slot-status ${s.status}`}>
                           <span>
                             {s.status === "open" ? "●" : <Check size={13} />}
@@ -236,7 +268,9 @@ export function SupportPageView({
                           {s.status === "open"
                             ? canAssign(page, s)
                               ? "募集中"
-                              : "受付終了"
+                              : paused
+                                ? "お休み中"
+                                : "受付終了"
                             : s.status === "completed"
                               ? "サポート完了"
                               : `${s.supporterNames.join("、")}さんが担当`}

@@ -8,6 +8,7 @@ export default function robots(): MetadataRoute.Robots {
       disallow: [
         "/s/",
         "/manage-assignment/",
+        "/r/",
         "/dashboard/",
         "/create/",
         "/auth/",

@@ -3047,3 +3047,254 @@ strong {
     animation: none !important;
   }
 }
+/* ご本人用ページ・お休み・支援する方へのお願い */
+.recipient-wrap {
+  max-width: 560px;
+  margin: 32px auto 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.recipient-heading h1 {
+  font-size: 22px;
+  margin-top: 10px;
+}
+.recipient-heading p {
+  margin-top: 6px;
+  font-size: 13px;
+}
+.recipient-wrap > .success-notice,
+.recipient-wrap > .closed-message,
+.recipient-wrap > .error-message {
+  margin: 0;
+}
+.recipient-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #fff;
+}
+.recipient-card h2,
+.recipient-section h2 {
+  font-size: 17px;
+}
+.recipient-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.recipient-choice {
+  min-height: 72px;
+  border: 1px solid #c9d6cc;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1px;
+  padding: 10px 12px;
+  text-align: left;
+  cursor: pointer;
+}
+.recipient-choice:hover {
+  border-color: var(--sage);
+  background: var(--light-sage);
+}
+.recipient-choice strong {
+  font-size: 14px;
+}
+.recipient-choice small {
+  font-size: 12px;
+  color: var(--muted);
+}
+.recipient-choice:last-child:nth-child(odd) {
+  grid-column: span 2;
+}
+.recipient-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.recipient-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.recipient-slot {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+  background: #fff;
+}
+.recipient-slot h3 {
+  font-size: 15px;
+  margin-top: 2px;
+}
+.recipient-slot p {
+  font-size: 13px;
+}
+.recipient-form h1 {
+  font-size: 21px;
+}
+.recipient-form fieldset {
+  border: none;
+  padding: 0;
+  margin-inline: 0;
+}
+.recipient-form legend {
+  font-weight: 500;
+  padding: 0;
+}
+.recipient-date-choices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-block: 8px;
+}
+.recipient-date-choices button {
+  min-height: 48px;
+  border: 1px solid #c9d6cc;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  cursor: pointer;
+}
+.recipient-date-choices button.active {
+  border: 2px solid var(--sage-dark);
+  background: var(--light-sage);
+  color: var(--sage-dark);
+  font-weight: 700;
+}
+.recipient-form .private-form {
+  margin-top: 22px;
+}
+.recipient-form > .button {
+  margin-top: 22px;
+}
+.field-hint.center {
+  text-align: center;
+}
+.recipient-share-text {
+  background: var(--paper);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.consideration-options {
+  display: flex;
+  flex-direction: column;
+}
+.consideration-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-size: 13px;
+}
+.consideration-option input {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  accent-color: var(--sage-dark);
+}
+.recipient-panel {
+  padding: 30px 0;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.recipient-panel h2 {
+  font-size: 18px;
+}
+.recipient-panel .share-box {
+  margin-top: 0;
+}
+.recipient-panel-actions {
+  align-items: center;
+}
+.recipient-pause {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.recipient-notice,
+.paused-notice {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: #f6ebe4;
+  color: #7a4429;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+.paused-notice {
+  flex-direction: column;
+  gap: 2px;
+  border: 2px solid var(--coral);
+  background: #fff;
+}
+.paused-notice p {
+  font-size: 13px;
+  color: var(--ink);
+}
+.recipient-notice svg {
+  flex: none;
+  margin-top: 3px;
+}
+.tag-recipient {
+  margin-top: 8px;
+  background: #f6ebe4;
+  color: #7a4429;
+}
+.considerations {
+  background: var(--light-sage);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+}
+.considerations h2 {
+  font-size: 15px;
+}
+.considerations ul {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+.considerations li {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+.considerations li svg {
+  flex: none;
+  margin-top: 5px;
+  color: var(--sage-dark);
+}
+.recipient-slot .cancel-link {
+  font-size: 13px;
+  color: var(--danger);
+  min-height: 44px;
+  margin: 2px 0 0 auto;
+}
+.recipient-wrap > .back-link {
+  align-self: flex-start;
+  min-height: 44px;
+}

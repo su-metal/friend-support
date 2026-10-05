@@ -14,7 +14,11 @@ export default defineConfig({
     command: "npm run dev",
     url: "http://127.0.0.1:3000",
     reuseExistingServer: true,
-    env: { APP_MODE: "demo", APP_URL: "http://127.0.0.1:3000" },
+    env: {
+      APP_MODE: "demo",
+      APP_URL: "http://127.0.0.1:3000",
+      ENABLE_RECIPIENT_ACCESS: "true",
+    },
     timeout: 120000,
   },
 });

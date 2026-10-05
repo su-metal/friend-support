@@ -28,6 +28,13 @@ const config: NextConfig = {
         ],
       },
       {
+        source: "/r/:path*",
+        headers: [
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+          { key: "Cache-Control", value: "private, no-store" },
+        ],
+      },
+      {
         source: "/manage-assignment/:path*",
         headers: [
           { key: "X-Robots-Tag", value: "noindex, nofollow" },

@@ -7,6 +7,7 @@ interface __BaseEnv_CloudflareEnv {
 	ENABLE_PRO: string;
 	ENABLE_GIFT_PARTNERS: string;
 	ENABLE_RECIPIENT_APPROVAL: string;
+	ENABLE_RECIPIENT_ACCESS: string;
 	ENABLE_CONTRIBUTIONS: string;
 	ENABLE_CASE_TYPES: string;
 	ENABLE_CALENDAR_VIEW: string;
@@ -32,7 +33,7 @@ type StringifyValues<EnvType extends Record<string, unknown>> = {
 	[Binding in keyof EnvType]: EnvType[Binding] extends string ? EnvType[Binding] : string;
 };
 declare namespace NodeJS {
-	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "ENABLE_PLUS" | "ENABLE_PRO" | "ENABLE_GIFT_PARTNERS" | "ENABLE_RECIPIENT_APPROVAL" | "ENABLE_CONTRIBUTIONS" | "ENABLE_CASE_TYPES" | "ENABLE_CALENDAR_VIEW" | "ENABLE_SMS" | "PLUS_PRICE_JPY" | "PRO_MONTHLY_PRICE_JPY" | "APP_MODE" | "APP_URL" | "FIREBASE_PROJECT_ID" | "NEXT_PUBLIC_FIREBASE_API_KEY" | "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN" | "NEXT_PUBLIC_FIREBASE_APP_ID">> {}
+	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "ENABLE_PLUS" | "ENABLE_PRO" | "ENABLE_GIFT_PARTNERS" | "ENABLE_RECIPIENT_APPROVAL" | "ENABLE_RECIPIENT_ACCESS" | "ENABLE_CONTRIBUTIONS" | "ENABLE_CASE_TYPES" | "ENABLE_CALENDAR_VIEW" | "ENABLE_SMS" | "PLUS_PRICE_JPY" | "PRO_MONTHLY_PRICE_JPY" | "APP_MODE" | "APP_URL" | "FIREBASE_PROJECT_ID" | "NEXT_PUBLIC_FIREBASE_API_KEY" | "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN" | "NEXT_PUBLIC_FIREBASE_APP_ID">> {}
 }
 
 // Begin runtime types

@@ -2,13 +2,13 @@
 
 Phase 1の利用フローは「作る→身近な人に共有→できる人が担当」。将来機能は、この主要導線へ不要な設定を増やさず追加する。
 
-| Phase | 既存の基盤 | 追加する実装 |
-|---|---|---|
-| 2: Plus | SupportPage.plan、価格設定、Purchase、PaymentProvider、機能フラグ | Stripe checkout/webhookの署名・冪等処理、権限更新、Plus UI、カレンダー、写真、一括通知 |
-| 3: ギフト | GiftPartner、GiftPartnerService、affiliate種別、専用イベント | 外部URLの検証、広告表示、送客・成果計測。決済主体はパートナー |
-| 4: Organization Pro | organizationId、Organization、OrganizationMember、PageMember、Subscription状態 | 組織単位の権限、複数担当者管理、課金、CSV、集計・ページング |
-| 5: ケース拡張 | SupportCaseType、CaseTemplate、カテゴリ共通モデル | illness/recovery/caregiving/bereavementのテンプレート選択とケース別の入力・コピー |
-| 6: 確認後に追加 | 担当トークン方式、PageMember、pending_recipient_approval、EmailProvider | 支援者アカウントの任意リンク、繰返し枠、待機リスト、受取人承認、カレンダー連携、SMS |
+| Phase               | 既存の基盤                                                                     | 追加する実装                                                                           |
+| ------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| 2: Plus             | SupportPage.plan、価格設定、Purchase、PaymentProvider、機能フラグ              | Stripe checkout/webhookの署名・冪等処理、権限更新、Plus UI、カレンダー、写真、一括通知 |
+| 3: ギフト           | GiftPartner、GiftPartnerService、affiliate種別、専用イベント                   | 外部URLの検証、広告表示、送客・成果計測。決済主体はパートナー                          |
+| 4: Organization Pro | organizationId、Organization、OrganizationMember、PageMember、Subscription状態 | 組織単位の権限、複数担当者管理、課金、CSV、集計・ページング                            |
+| 5: ケース拡張       | SupportCaseType、CaseTemplate、カテゴリ共通モデル                              | illness/recovery/caregiving/bereavementのテンプレート選択とケース別の入力・コピー      |
+| 6: 確認後に追加     | 担当トークン方式、PageMember、pending_recipient_approval、EmailProvider        | 支援者アカウントの任意リンク、繰返し枠、待機リスト、受取人承認、カレンダー連携、SMS    |
 
 ## モデルとサービス
 
@@ -20,7 +20,7 @@ Phase 1の利用フローは「作る→身近な人に共有→できる人が�
 
 支援者アカウントを追加する場合、既存の匿名担当と管理リンクを維持し、本人確認後に担当をアカウントへ関連付ける。繰返し枠は具体的な日付のSupportSlotへ展開し、既存の担当競合・キャンセル処理を利用する。待機リストは確定した担当と別のコレクションで管理する。
 
-受取人承認は、承認待ちのページを公開APIで取得させない。承認トークンは用途別に発行・ハッシュ化し、担当トークンを流用しない。健康情報の公開範囲は自動拡張しない。
+ご本人用リンク（Phase 1拡張、`ENABLE_RECIPIENT_ACCESS`）は実装済みで、PageMemberのrecipientロールやアカウントは使わない。受取人承認は、承認待ちのページを公開APIで取得させない。承認トークンは用途別に発行・ハッシュ化し、担当トークンを流用しない。健康情報の公開範囲は自動拡張しない。
 
 ## 運用と移行
 
