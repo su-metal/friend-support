@@ -122,7 +122,7 @@ export function Wizard({ existing }: { existing?: OrganizerPage }) {
       if (existing) {
         await postJson(
           `/api/pages/${existing.id}`,
-          { action: "save", draft },
+          { action: "save", draft, baseRevision: existing.revision },
           "PATCH",
         );
         router.push(`/dashboard/${existing.id}`);

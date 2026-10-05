@@ -94,6 +94,25 @@ export const pageDraftSchema = z
         message: "予定が重複しています",
       });
   });
+export const recipientRequestSchema = z
+  .object({
+    kind: z.enum(["meal", "supplies", "transport", "housework", "other"]),
+    date: dateSchema,
+    startTime: time,
+    endTime: time,
+    title: text(80).min(1, "予定の名前を入力してください"),
+    description: text(300),
+    privateInstructions: text(1000),
+  })
+  .refine((s) => !s.endTime || (!!s.startTime && s.endTime > s.startTime), {
+    message: "終わりの時間は始まりの時間より後にしてください",
+    path: ["endTime"],
+  });
+export const considerationsSchema = z
+  .array(z.enum(["no_return_gift", "doorstep_only", "short_visit", "no_reply"]))
+  .max(4)
+  .transform((ids) => [...new Set(ids)]);
+export const recipientTokenSchema = z.string().regex(/^[A-Za-z0-9_-]{43}$/);
 export const assignmentSchema = z.object({
   slotId: z.string().uuid(),
   supporterName: text(40).min(1, "お名前を入力してください"),
@@ -130,7 +149,7 @@ export function shortDate(date: string) {
   }).format(new Date(`${date}T00:00:00+09:00`));
 }
 export function canAssign(
-  page: Pick<SupportPage, "status" | "endDate">,
+  page: Pick<SupportPage, "status" | "endDate" | "pausedAt">,
   slot: Pick<
     SupportSlot,
     "status" | "date" | "quantityNeeded" | "supporterNames"
@@ -139,6 +158,7 @@ export function canAssign(
 ) {
   return (
     page.status === "published" &&
+    !page.pausedAt &&
     page.endDate >= today &&
     slot.date >= today &&
     slot.status === "open" &&

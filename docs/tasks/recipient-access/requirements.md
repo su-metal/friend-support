@@ -1,6 +1,6 @@
-# 本人用リンク：変更要件（案）
+# 本人用リンク：変更要件
 
-状態：**設計案。方針は2026-10-05にユーザーと合意（`design.md` の決定事項）。モック合意前で、全体要件（`docs/requirements_definition.md`）にはまだ反映していない。** 確認後に要件書と `AGENTS.md` を同じ変更で更新してから実装する。
+状態：2026-10-05にモック合意・実装。全体要件（`docs/requirements_definition.md`）と `AGENTS.md` に反映済み。機能フラグ `ENABLE_RECIPIENT_ACCESS` は既定OFFで、本番ONは未実施。
 
 ## 背景
 

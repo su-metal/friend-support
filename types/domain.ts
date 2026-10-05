@@ -9,6 +9,10 @@ export type SupportCaseType =
 export type PageStatus =
   "draft" | "pending_recipient_approval" | "published" | "closed" | "archived";
 export type Plan = "free" | "plus" | "pro";
+export type ConsiderationId =
+  "no_return_gift" | "doorstep_only" | "short_visit" | "no_reply";
+export type RecipientRequestKind =
+  "meal" | "supplies" | "transport" | "housework" | "other";
 export interface SupportCategory {
   id: string;
   name: string;
@@ -53,6 +57,8 @@ export interface SupportPage {
   visibility: "link" | "passcode";
   organizationId?: string;
   thanksMessage: string;
+  pausedAt?: string;
+  considerations?: ConsiderationId[];
   createdAt: string;
   updatedAt: string;
 }
@@ -65,6 +71,24 @@ export interface PublicSupportPage extends Omit<
 export interface OrganizerPage extends SupportPage {
   slots: (SupportSlot & SlotPrivateInfo)[];
   assignments: OrganizerAssignment[];
+  revision: number;
+  recipientLinkActive: boolean;
+  recipientSlotIds: string[];
+}
+export interface RecipientView {
+  page: Omit<PublicSupportPage, "slots">;
+  slots: (SupportSlot & { mine: boolean })[];
+  canRequest: boolean;
+  slotLimitReached: boolean;
+}
+export interface RecipientRequestInput {
+  kind: RecipientRequestKind;
+  date: string;
+  startTime: string;
+  endTime: string;
+  title: string;
+  description: string;
+  privateInstructions: string;
 }
 export interface OrganizerAssignment {
   id: string;

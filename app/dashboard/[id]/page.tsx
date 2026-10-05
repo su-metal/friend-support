@@ -5,6 +5,7 @@ import { supportService } from "@/services/factory";
 import { appUrl } from "@/lib/env";
 import { Header, Footer } from "@/components/shell";
 import { DashboardDetail } from "@/components/dashboard";
+import { getFeatureFlags } from "@/config/product";
 export const metadata = {
   title: "サポートの管理",
   robots: { index: false, follow: false },
@@ -35,6 +36,7 @@ export default async function Detail({
           page={page}
           publicUrl={`${appUrl()}/s/${page.slug}`}
           justPublished={(await searchParams).published === "1"}
+          recipientEnabled={getFeatureFlags().recipientAccess}
         />
       </main>
       <Footer />

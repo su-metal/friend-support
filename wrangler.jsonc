@@ -27,6 +27,7 @@
     "ENABLE_PRO": "false",
     "ENABLE_GIFT_PARTNERS": "false",
     "ENABLE_RECIPIENT_APPROVAL": "false",
+    "ENABLE_RECIPIENT_ACCESS": "false",
     "ENABLE_CONTRIBUTIONS": "false",
     "ENABLE_CASE_TYPES": "false",
     "ENABLE_CALENDAR_VIEW": "false",

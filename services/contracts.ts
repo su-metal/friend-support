@@ -5,6 +5,9 @@ import type {
   PublicSupportPage,
   ManagedAssignment,
   GiftPartner,
+  ConsiderationId,
+  RecipientRequestInput,
+  RecipientView,
 } from "@/types/domain";
 export interface AuthService {
   currentUser(): Promise<User | null>;
@@ -39,6 +42,25 @@ export interface AssignmentService {
   ): Promise<{ token: string; id: string }>;
   manage(token: string): Promise<ManagedAssignment | null>;
   cancel(token: string): Promise<void>;
+}
+export interface RecipientService {
+  issueLink(user: User, pageId: string): Promise<{ token: string }>;
+  revokeLink(user: User, pageId: string): Promise<void>;
+  updateSettingsAsOrganizer(
+    user: User,
+    pageId: string,
+    input: { paused?: boolean; considerations?: ConsiderationId[] },
+  ): Promise<void>;
+  view(token: string): Promise<RecipientView | null>;
+  addRequest(
+    token: string,
+    input: RecipientRequestInput,
+  ): Promise<{ slotId: string }>;
+  withdrawRequest(token: string, slotId: string): Promise<void>;
+  updateSettings(
+    token: string,
+    input: { paused?: boolean; considerations?: ConsiderationId[] },
+  ): Promise<void>;
 }
 export interface EmailProvider {
   send(email: {
@@ -80,7 +102,12 @@ export type AnalyticsEventName =
   | "plus_purchased"
   | "pro_trial_started"
   | "pro_subscribed"
-  | "gift_partner_clicked";
+  | "gift_partner_clicked"
+  | "recipient_link_issued"
+  | "recipient_request_created"
+  | "recipient_request_withdrawn"
+  | "recipient_paused"
+  | "recipient_resumed";
 export interface GiftPartnerService {
   list(): Promise<GiftPartner[]>;
 }

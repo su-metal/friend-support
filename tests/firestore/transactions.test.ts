@@ -8,6 +8,8 @@ import {
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { FirestoreRestStore } from "@/lib/firebase/firestore-rest";
 import { SupportService } from "@/services/support";
+import { RecipientService } from "@/services/recipient";
+import { addDays, todayJst } from "@/lib/domain";
 import { draft, user } from "../fixtures";
 let environment: RulesTestEnvironment;
 beforeAll(async () => {
@@ -99,6 +101,53 @@ describe("Firestoreの実トランザクションとSecurity Rules", () => {
     );
     await service.remove(user, id);
   });
+  it("ご本人の同時のお願いを両方確定し、古い画面からの保存で消さない", async () => {
+    const service = new SupportService(new FirestoreRestStore()),
+      base = draft(),
+      start = todayJst();
+    const id = await service.create(user, {
+      ...base,
+      startDate: start,
+      endDate: addDays(start, 30),
+    });
+    await service.setStatus(user, id, "published");
+    const stale = await service.organizerPage(user, id);
+    const { token } = await new RecipientService(
+      new FirestoreRestStore(),
+    ).issueLink(user, id);
+    const input = {
+      kind: "meal" as const,
+      date: start,
+      startTime: "",
+      endTime: "",
+      title: "夕食を届ける",
+      description: "",
+      privateInstructions: "",
+    };
+    const results = await Promise.all([
+      new RecipientService(new FirestoreRestStore()).addRequest(token, input),
+      new RecipientService(new FirestoreRestStore()).addRequest(token, input),
+    ]);
+    await expect(
+      service.save(
+        user,
+        id,
+        {
+          ...base,
+          startDate: stale.startDate,
+          endDate: stale.endDate,
+          slots: stale.slots.map((s) => ({ ...s })),
+        },
+        stale.revision,
+      ),
+    ).rejects.toMatchObject({ status: 409 });
+    const page = await service.organizerPage(user, id);
+    expect(page.slots).toHaveLength(3);
+    expect([...page.recipientSlotIds].sort()).toEqual(
+      results.map((r) => r.slotId).sort(),
+    );
+    await service.remove(user, id);
+  });
   it("匿名・認証済みブラウザーから全コレクションの直接読み書きを拒否する", async () => {
     for (const client of [
       environment.unauthenticatedContext(),
@@ -111,6 +160,7 @@ describe("Firestoreの実トランザクションとSecurity Rules", () => {
         "page_secrets",
         "slot_assignments",
         "assignment_tokens",
+        "recipient_tokens",
         "notifications",
         "analytics_events",
         "purchases",
