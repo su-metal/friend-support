@@ -634,6 +634,7 @@ strong {
 }
 .step-number {
   position: absolute;
+  z-index: 1;
   top: 0;
   left: 20%;
   font-family: Georgia, serif;
@@ -2441,9 +2442,10 @@ strong {
     gap: 2px 20px;
   }
   .step-number {
-    left: -2px;
-    top: -7px;
+    left: -8px;
+    top: -12px;
     font-size: 22px;
+    line-height: 1;
   }
   .step-art {
     grid-row: 1/3;
