@@ -40,7 +40,7 @@ export async function GET(request: Request) {
     const staleSkipped = await service.expireStale();
     const result =
       process.env.RESEND_API_KEY && process.env.EMAIL_FROM
-        ? await service.dispatch()
+        ? await service.dispatch(10)
         : { sent: 0, failed: 0, emailConfigured: false };
     return json({ closed, deleted, staleSkipped, ...result });
   });
