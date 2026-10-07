@@ -34,6 +34,8 @@ FirestoreはドキュメントDBのため空のコレクションを事前作成
 
 ご本人のお願い：ハッシュ参照→ページを読み、recipientTokenHash一致・公開中・期間内・60枠未満を確認する。予定・slot_secrets・ページのslotIds/recipientSlotIds/revision・計測・主催者通知を同一commitで保存する。取り消しはrecipientSlotIdsに含まれ募集中の予定だけ。主催者の保存はbaseRevisionがrevisionと一致する場合だけ確定する。
 
+保存期間：Cronが終了日から30日（`RETENTION_DAYS`）を過ぎたページを1件ずつ手動削除と同じ処理で消す（`purgeExpired`）。削除の前に `analytics_events/auto-deleted-{pageId}` を記録する。通知は予定時刻から12時間（前日・当日のリマインド）または24時間（その他）を過ぎたら `skipped` にし、`encryptedText` を空にする。
+
 ## 境界
 
 ブラウザーの全コレクション操作をRulesで拒否。サーバーはOAuth IAMでFirestore RESTへ接続するためRulesを迂回する。そのため主催者ID・ページ所属・公開状態・パスコード許可・管理トークンを **サービス層の各ユースケース** で確認する。クライアントの入力だけを権限根拠にしない。

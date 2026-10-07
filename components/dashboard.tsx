@@ -15,8 +15,14 @@ import {
   Bell,
 } from "lucide-react";
 import type { OrganizerPage } from "@/types/domain";
-import { categories } from "@/config/product";
-import { fillStats, dateLabel, isPageClosed, todayJst } from "@/lib/domain";
+import { categories, RETENTION_DAYS } from "@/config/product";
+import {
+  addDays,
+  fillStats,
+  dateLabel,
+  isPageClosed,
+  todayJst,
+} from "@/lib/domain";
 import { ErrorMessage, postJson, requestJson, Modal } from "./ui";
 import { ShareButtons } from "./share";
 import { RecipientPanel } from "./recipient-panel";
@@ -232,6 +238,13 @@ export function DashboardDetail({
         </div>
       </div>
       <ErrorMessage message={error} />
+      {closed && (
+        <p className="retention-notice">
+          {dateLabel(addDays(page.endDate, RETENTION_DAYS + 1), true)}
+          ごろに、このページと予定・担当者の情報は自動で削除されます（終了日の
+          {RETENTION_DAYS}日後）。
+        </p>
+      )}
       {recipientEnabled && recipientOpen > 0 && !closed && (
         <div className="recipient-notice" role="status">
           <Bell size={18} />

@@ -87,6 +87,10 @@ export const considerationOptions: { id: ConsiderationId; label: string }[] = [
   { id: "short_visit", label: "会うときは短めにお願いします" },
   { id: "no_reply", label: "お礼の返信は不要です" },
 ];
+// 支援期間の終了日から何日後に、ページと担当者などの個人情報を自動で削除するか。
+export const RETENTION_DAYS = 30;
+// プライバシーポリシーに載せる問い合わせ先。空のあいだは「準備中」と表示する。
+export const CONTACT_EMAIL = "";
 export const caseTemplates: CaseTemplate[] = [
   {
     id: "postpartum-basic",

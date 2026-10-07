@@ -20,8 +20,11 @@ export async function GET(request: Request) {
       throw new AppError("unauthorized", "認証が必要です", 401);
     if (isDemoMode()) return json({ demo: true, sent: 0 });
     const store = await getStore();
-    const deleted = await new SupportService(store).retryDeletions();
+    const support = new SupportService(store);
+    const deleted = await support.retryDeletions();
     if (deleted) return json({ deleted, closed: 0, sent: 0, failed: 0 });
+    const purged = await support.purgeExpired();
+    if (purged) return json({ purged, closed: 0, sent: 0, failed: 0 });
     const buckets = await store.query<{ id: string; expiresAt: string }>(
       "rate_limit_buckets",
     );
@@ -34,10 +37,11 @@ export async function GET(request: Request) {
       );
     const service = new NotificationService(store, new ResendEmailProvider());
     const closed = await service.closeExpiredPages();
+    const staleSkipped = await service.expireStale();
     const result =
       process.env.RESEND_API_KEY && process.env.EMAIL_FROM
         ? await service.dispatch()
         : { sent: 0, failed: 0, emailConfigured: false };
-    return json({ closed, deleted, ...result });
+    return json({ closed, deleted, staleSkipped, ...result });
   });
 }

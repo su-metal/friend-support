@@ -31,6 +31,7 @@ import {
   encryptContent,
 } from "@/lib/security";
 import { appUrl } from "@/lib/env";
+import { RETENTION_DAYS } from "@/config/product";
 export interface PageDocument extends SupportPage {
   slotIds: string[];
   organizerEmail: string;
@@ -721,6 +722,31 @@ export class SupportService
     await this.store.transaction(async (tx) =>
       tx.delete(`support_pages/${id}`),
     );
+  }
+  // 終了日からRETENTION_DAYS日を過ぎたページを、手動削除と同じ処理で消す。
+  async purgeExpired(limit = 1, today = todayJst()) {
+    const cutoff = addDays(today, -RETENTION_DAYS);
+    const pages = (
+      await Promise.all(
+        (["published", "closed", "draft"] as const).map((status) =>
+          this.store.query<PageDocument>("support_pages", [
+            { field: "status", value: status },
+          ]),
+        ),
+      )
+    )
+      .flat()
+      .filter((p) => !p.deletionRequestedAt && p.endDate < cutoff)
+      .slice(0, limit);
+    for (const p of pages) {
+      await this.store.set(`analytics_events/auto-deleted-${p.id}`, {
+        name: "page_auto_deleted",
+        properties: { pageId: p.id },
+        createdAt: now(),
+      });
+      await this.remove({ id: p.organizerId, email: p.organizerEmail }, p.id);
+    }
+    return pages.length;
   }
   async retryDeletions(limit = 1) {
     const pages = await this.store.query<PageDocument>("support_pages", [

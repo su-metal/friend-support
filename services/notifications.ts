@@ -31,6 +31,18 @@ export class ResendEmailProvider implements EmailProvider {
       throw new Error(`メール送信に失敗しました (${response.status})`);
   }
 }
+const HOUR = 3600000;
+// 送れないまま時間が過ぎた通知は送らない。メールを有効にした直後に、
+// 過去の予定のリマインドや古い確認メールがまとめて届くのを防ぐ。
+export function isStale(
+  n: Pick<NotificationDocument, "kind" | "dueAt">,
+  now = Date.now(),
+) {
+  const limit = ["previous_day", "same_day"].includes(n.kind)
+    ? 12 * HOUR
+    : 24 * HOUR;
+  return Date.parse(n.dueAt) < now - limit;
+}
 export class NotificationService {
   constructor(
     private store: DocumentStore,
@@ -84,11 +96,16 @@ export class NotificationService {
         if (
           !p ||
           p.deletionRequestedAt ||
+          isStale(n) ||
           (n.assignmentId && a?.status !== "active") ||
           (["previous_day", "same_day"].includes(n.kind) &&
             (p.status !== "published" || p.endDate < todayJst()))
         ) {
-          tx.set(`notifications/${n.id}`, { ...n, status: "skipped" });
+          tx.set(`notifications/${n.id}`, {
+            ...n,
+            status: "skipped",
+            encryptedText: "",
+          });
           return null;
         }
         const claimed = {
@@ -135,6 +152,31 @@ export class NotificationService {
       });
     }
     return { sent, failed };
+  }
+  // メールが未設定のあいだも、期限を過ぎた送信待ちを送らない扱いにして本文を消す。
+  async expireStale(limit = 100) {
+    const stale = (
+      await this.store.query<NotificationDocument>("notifications", [
+        { field: "status", value: "pending" },
+      ])
+    )
+      .filter((n) => isStale(n))
+      .slice(0, limit);
+    if (stale.length)
+      await this.store.transaction(async (tx) => {
+        const current = await tx.getMany<NotificationDocument>(
+          stale.map((n) => `notifications/${n.id}`),
+        );
+        current.forEach((n) => {
+          if (n?.status === "pending" && isStale(n))
+            tx.set(`notifications/${n.id}`, {
+              ...n,
+              status: "skipped",
+              encryptedText: "",
+            });
+        });
+      });
+    return stale.length;
   }
   async closeExpiredPages(limit = 3) {
     const pages = await this.store.query<PageDocument>("support_pages", [

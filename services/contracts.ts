@@ -107,7 +107,8 @@ export type AnalyticsEventName =
   | "recipient_request_created"
   | "recipient_request_withdrawn"
   | "recipient_paused"
-  | "recipient_resumed";
+  | "recipient_resumed"
+  | "page_auto_deleted";
 export interface GiftPartnerService {
   list(): Promise<GiftPartner[]>;
 }
