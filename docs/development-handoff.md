@@ -3,6 +3,16 @@
 更新日：2026-10-12。Codex・Claude Code共通の作業記録。
 仕様は `docs/requirements_definition.md`、開発ルールは `AGENTS.md`。この記録だけから仕様・権限・外部設定の変更を判断しない。
 
+## 2026-10-12 React開発モードのCSP修正
+
+- `next.config.ts`の`script-src`に`unsafe-eval`を開発時（`NODE_ENV=development`）だけ追加。Reactの開発用診断を有効にし、本番CSPは変更しない。
+- `AGENTS.md`と要件書に開発時限定の許可方針を明記。
+- ローカル検証（origin/main からの隔離チェックアウト）：`npm run docs:check`、typecheck、lint、unit 42件、Firestore emulator integration 5件、E2E 8件（375/390/430px）を通過。Playwrightで開発時レスポンスに`unsafe-eval`があり、本番CSPに含まれないことを確認。
+- Cloudflare build成功（OpenNextのWindows警告あり）。WranglerローカルpreviewはHTTP 200、本番CSPに`unsafe-eval`がないことを確認。実デプロイ・実接続の確認ではない。
+- 本番デプロイ・Cloudflare設定変更は行っていない。
+- GitHub：ドラフトPR [#5](https://github.com/su-metal/friend-support/pull/5) を作成し、ブランチをpush済み。未マージ・未デプロイ。
+- DB変更なし。次の作業はPRレビュー・マージ後の別途指定されたリリース作業。
+
 ## 2026-10-12 競合リトライとカレンダー改行の修正
 
 担当ツール：Codex。GitHub [PR #3](https://github.com/su-metal/friend-support/pull/3) を `main` にsquash mergeし、本番Worker `friend-support` に反映した。
