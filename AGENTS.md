@@ -14,6 +14,7 @@
 - 検索向けサイトマップにはトップページ、サービス案内、支援ガイドなど明示した公開ページだけを載せる。個別支援ページ、デモ、ログイン・管理・APIのURLは載せない。個別支援ページのnoindex・no-followと既存のrobots制御を維持する。
 - DB定義は `firestore.rules`、`firestore.indexes.json`、`docs/data-model.md`。データ移行はバージョン付きスクリプトで管理する。
 - Next.jsをOpenNextアダプターでCloudflare Workersへデプロイする。FirestoreとAuthはREST + Web Cryptoで操作し、Node専用Firebase Admin SDKに依存しない。Secretsをコード・ログに出さない。
+- CSPの`unsafe-eval`はReactの診断に必要な開発時だけ許可し、本番では許可しない。
 - デモはローカルホストのみ、明示的なAPP_MODE=demoで有効。デモのデータはプロセス内に保持し、再起動で初期化される。実メールを送信しない。
 - Phase 2〜6はデータモデルとプロバイダー契約の土台。既定でOFF。寄付、支援金送金、知らない人のマッチング、チャットを追加しない。
 - 機能、権限、運用を変更する場合は本ファイルと要件書を同じ変更で更新する。
