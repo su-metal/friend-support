@@ -17,13 +17,13 @@ for (const width of [375, 390, 430]) {
     page.on("pageerror", (e) => errors.push(e.message));
     await page.goto("/create");
     await page.getByRole("button", { name: "デモでページ作成を試す" }).click();
-    await page.getByLabel("サポートする方のお名前").fill(`本人確認${name}`);
-    await page.getByRole("button", { name: "次へ", exact: true }).click();
-    await page.getByRole("button", { name: "次へ", exact: true }).click();
-    await page.getByRole("button", { name: "🍱 食事" }).click();
-    await page.getByRole("button", { name: "この予定を保存する" }).click();
-    await page.getByRole("button", { name: "次へ", exact: true }).click();
-    await page.getByRole("button", { name: "下書きを保存して公開へ" }).click();
+    await page.getByLabel("サポートする方の呼び名").fill(`本人確認${name}`);
+    await page
+      .getByRole("button", { name: "ページを作って予定を追加する" })
+      .click();
+    await page.locator(".calendar-day:not([disabled])").first().click();
+    await page.getByRole("button", { name: "食事", exact: true }).click();
+    await page.getByRole("button", { name: "下書きに追加する" }).click();
     await page
       .getByRole("button", { name: "ページを公開する", exact: true })
       .click();

@@ -20,6 +20,7 @@ import {
   addDays,
   canAssign,
   pageDraftSchema,
+  slotsToAddSchema,
   assignmentSchema,
   todayJst,
 } from "@/lib/domain";
@@ -307,6 +308,42 @@ export class SupportService
     });
     return id;
   }
+  async addSlots(user: User, id: string, input: unknown, baseRevision: number) {
+    const additions = slotsToAddSchema.parse(input);
+    const stamp = now();
+    await this.store.transaction(async (tx) => {
+      const p = await owned(tx, user, id);
+      if (["closed", "archived"].includes(p.status) || p.endDate < todayJst())
+        throw new AppError("closed", "終了したページに予定を追加できません");
+      if (p.status === "pending_recipient_approval")
+        throw new AppError("status", "確認中のページは編集できません", 409);
+      if (baseRevision !== (p.revision ?? 0))
+        throw new AppError(
+          "stale",
+          "予定一覧が更新されました。画面を読み込み直してください",
+          409,
+        );
+      if (p.slotIds.length + additions.length > 60)
+        throw new AppError("slot_limit", "予定は1ページ60件までです");
+      for (const slot of additions) {
+        if (slot.date < p.startDate || slot.date > p.endDate)
+          throw new AppError("period", "予定の日付は支援期間内にしてください");
+        if (slot.date < todayJst())
+          throw new AppError("past_slot", "今日以降の日付を選んでください");
+      }
+      const created = additions.map((slot) => ({
+        ...slot,
+        id: crypto.randomUUID(),
+      }));
+      tx.set(`support_pages/${id}`, {
+        ...p,
+        slotIds: [...p.slotIds, ...created.map((slot) => slot.id)],
+        revision: (p.revision ?? 0) + 1,
+        updatedAt: stamp,
+      });
+      created.forEach((slot) => this.writeSlot(tx, id, slot, stamp));
+    });
+  }
   private writeSlot(
     tx: Transaction,
     pageId: string,
@@ -344,6 +381,11 @@ export class SupportService
       const p = await owned(tx, user, id);
       if (["closed", "archived"].includes(p.status) || p.endDate < todayJst())
         throw new AppError("closed", "終了したページは編集できません");
+      if (p.status === "published" && draft.slots.length === 0)
+        throw new AppError(
+          "period",
+          "公開中のページには予定を1件以上残してください",
+        );
       if (baseRevision !== undefined && baseRevision !== (p.revision ?? 0))
         throw new AppError(
           "stale",

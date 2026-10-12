@@ -28,6 +28,13 @@ export async function PATCH(request: Request, context: Context) {
         pageDraftSchema.parse(body.draft),
         z.number().int().min(0).parse(body.baseRevision),
       );
+    else if (body.action === "add_slots")
+      await service.addSlots(
+        user,
+        id,
+        body.slots,
+        z.number().int().min(0).parse(body.baseRevision),
+      );
     else if (body.action === "recipient_link_issue") {
       const { token } = await (await recipientService()).issueLink(user, id);
       return json({ ok: true, url: `${appUrl()}/r/${token}` });

@@ -8,6 +8,7 @@ import {
 import { AnalyticsService } from "@/services/analytics";
 import { NotificationService } from "@/services/notifications";
 import { hashToken } from "@/lib/security";
+import { addDays } from "@/lib/domain";
 import { draft, user } from "../fixtures";
 let store: MemoryStore, service: SupportService;
 beforeEach(() => {
@@ -24,6 +25,91 @@ async function published(passcode?: string) {
   return p;
 }
 describe("支援ページと担当", () => {
+  it("予定0件の下書きを作り、カレンダーから複数日の予定を追加して公開できる", async () => {
+    const emptyDraft = { ...draft(), slots: [] },
+      id = await service.create(user, emptyDraft),
+      before = await service.organizerPage(user, id);
+    expect(before.slots).toEqual([]);
+    expect(await service.publicPage(before.slug)).toBeNull();
+    await expect(
+      service.setStatus(user, id, "published"),
+    ).rejects.toMatchObject({
+      code: "period",
+    });
+
+    await service.addSlots(
+      user,
+      id,
+      [
+        { ...draft().slots[0], date: before.startDate },
+        { ...draft().slots[0], date: addDays(before.startDate, 1) },
+      ],
+      before.revision,
+    );
+    const added = await service.organizerPage(user, id);
+    expect(added.slots).toHaveLength(2);
+    expect(added.revision).toBe(before.revision + 1);
+    await service.setStatus(user, id, "published");
+    await service.addSlots(
+      user,
+      id,
+      [{ ...draft().slots[0], date: addDays(before.startDate, 2) }],
+      added.revision,
+    );
+    const publicPage = await service.publicPage(before.slug);
+    expect(publicPage).not.toBe("locked");
+    expect(
+      publicPage && publicPage !== "locked" ? publicPage.slots : [],
+    ).toHaveLength(3);
+    expect(JSON.stringify(publicPage)).not.toContain("非公開住所サンプル");
+    expect(JSON.stringify(publicPage)).not.toContain("非公開アレルギー");
+  });
+
+  it("公開中のページは予定を0件にできない", async () => {
+    const p = await published();
+    await expect(
+      service.save(user, p.id, { ...draft(), slots: [] }, p.revision),
+    ).rejects.toMatchObject({ code: "period" });
+    expect((await service.organizerPage(user, p.id)).slots).toHaveLength(1);
+  });
+
+  it("予定追加は所有者、期間、版、60件の上限を確認する", async () => {
+    const id = await service.create(user, { ...draft(), slots: [] }),
+      p = await service.organizerPage(user, id),
+      slot = { ...draft().slots[0], date: p.startDate };
+    await expect(
+      service.addSlots({ ...user, id: "other" }, id, [slot], p.revision),
+    ).rejects.toMatchObject({ status: 404 });
+    await expect(
+      service.addSlots(user, id, [slot], p.revision + 1),
+    ).rejects.toMatchObject({
+      status: 409,
+      code: "stale",
+    });
+    await expect(
+      service.addSlots(
+        user,
+        id,
+        [{ ...slot, date: addDays(p.endDate, 1) }],
+        p.revision,
+      ),
+    ).rejects.toMatchObject({ code: "period" });
+
+    await service.addSlots(
+      user,
+      id,
+      Array.from({ length: 60 }, () => slot),
+      p.revision,
+    );
+    const full = await service.organizerPage(user, id);
+    expect(full.slots).toHaveLength(60);
+    await expect(
+      service.addSlots(user, id, [slot], full.revision),
+    ).rejects.toMatchObject({
+      code: "slot_limit",
+    });
+  });
+
   it("担当済み予定を変えずにページ説明を編集できる", async () => {
     const p = await published();
     await service.assign(p.slug, p.slots[0].id, { supporterName: "A" });

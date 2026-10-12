@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { currentUser } from "@/lib/auth/server";
 import { Header, Footer } from "@/components/shell";
-import { Wizard } from "@/components/wizard";
+import { PageStarter } from "@/components/page-starter";
 import { TrackView } from "@/components/analytics";
 export const metadata = {
   title: "サポートページを作る",
@@ -14,7 +14,7 @@ export default async function Create() {
       <Header minimal />
       <TrackView name="create_started" />
       <main id="main" className="form-page container">
-        <Wizard />
+        <PageStarter />
       </main>
       <Footer />
     </>

@@ -20,6 +20,7 @@ import { fillStats, dateLabel, isPageClosed, todayJst } from "@/lib/domain";
 import { ErrorMessage, postJson, requestJson, Modal } from "./ui";
 import { ShareButtons } from "./share";
 import { RecipientPanel } from "./recipient-panel";
+import { OrganizerCalendar } from "./organizer-calendar";
 export function AccountSignOut() {
   const router = useRouter();
   return (
@@ -138,6 +139,10 @@ export function DashboardDetail({
     try {
       await postJson(`/api/pages/${page.id}`, { status }, "PATCH");
       setStatusConfirm(null);
+      if (status === "published") {
+        router.push(`/dashboard/${page.id}?published=1`);
+        return;
+      }
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "変更できませんでした");
@@ -241,6 +246,7 @@ export function DashboardDetail({
           </p>
         </div>
       )}
+      {!closed && <OrganizerCalendar page={page} />}
       <div className="dashboard-summary">
         <div>
           <p className="muted small">みんなのサポート状況</p>
@@ -267,11 +273,13 @@ export function DashboardDetail({
         <div className="dashboard-share">
           <h2>ページを公開して、共有しましょう。</h2>
           <p className="muted">
-            内容をご本人に確認してもらったら、公開できます。
+            {page.slots.length
+              ? "内容をご本人に確認してもらったら、公開できます。"
+              : "予定を1件追加すると、公開して共有できるようになります。"}
           </p>
           <button
             className="button primary"
-            disabled={busy}
+            disabled={busy || !page.slots.length}
             onClick={() => changeStatus("published")}
           >
             {busy ? "公開しています…" : "ページを公開する"}
@@ -299,7 +307,7 @@ export function DashboardDetail({
               className="button secondary"
             >
               <Pencil size={16} />
-              ページ・予定を編集
+              ページの設定・予定を詳しく編集
             </Link>
           )}
         </div>

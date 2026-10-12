@@ -3,6 +3,13 @@
 更新日：2026-10-12。Codex・Claude Code共通の作業記録。
 仕様は `docs/requirements_definition.md`、開発ルールは `AGENTS.md`。この記録だけから仕様・権限・外部設定の変更を判断しない。
 
+## 2026-10-12 カレンダーから始めるサポートページ作成
+
+- ページ作成フォームで呼び名と期間を決めて、予定0件の非公開下書きを保存できるようにした。管理画面のカレンダーから単日または複数日を選び、カテゴリと予定名を使って追加する。詳しい説明、時刻、非公開指示などは任意。
+- 予定追加APIは所有者、ページ状態、支援期間、過去日、60件上限、revisionをサービス層のトランザクションで検証する。予定一覧・revision・予定・秘密情報を同一commitで保存する。空ページの公開と公開中ページの全予定削除は拒否する。DB構造変更・移行はない。
+- ローカル検証：`npm run docs:check`、`npm run typecheck`、`npm run lint`、unit（45件）、Firestore Emulator integration（5件）、E2E（8件、375/390/430px）、`npm run build:cloudflare` が通過。lintはエラーなし・既存ファイル由来の警告2件。integrationは初回に競合テストが一度409となったが、再実行で5件すべて通過。OpenNextからWindows実行に関する警告あり。
+- Cloudflareデプロイ、実Firebase接続、実機LINE起動・カレンダー取り込みは未実施。DB構造変更なし。
+
 ## 2026-10-12 React開発モードのCSP修正
 
 - `next.config.ts`の`script-src`に`unsafe-eval`を開発時（`NODE_ENV=development`）だけ追加。Reactの開発用診断を有効にし、本番CSPは変更しない。
@@ -158,3 +165,4 @@ Firestore CLIはユーザーフォルダーのconfigstore読み取りがEPERMで
 4. 実装変更はAGENTS.mdの検証ルールに従い、文書参照は `npm run docs:check` で確認する。
 5. 終了時に本記録の更新日・担当ツール・直近変更・検証結果・デプロイ・残作業を更新する。成功、失敗、未実施を明記する。
 6. 仕様変更は要件書とAGENTS.mdへ反映する。過去のレポートを最新状態の代わりに使わない。
+
