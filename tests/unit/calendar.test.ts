@@ -38,4 +38,12 @@ describe("カレンダー登録用ファイル", () => {
     const unfolded = ics.replace(/\r\n /g, "");
     expect(unfolded).toContain(`DESCRIPTION:${"あ".repeat(60)}`);
   });
+  it("単独のCRもエスケープし、追加のプロパティ行にしない", () => {
+    const ics = buildIcs(
+      { ...base, title: "安全\rX-WR-CALNAME:不正な追加項目" },
+      now,
+    );
+    expect(ics).toContain("SUMMARY:安全\\nX-WR-CALNAME:不正な追加項目");
+    expect(ics).not.toContain("\rX-WR-CALNAME:不正な追加項目");
+  });
 });

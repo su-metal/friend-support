@@ -1,7 +1,16 @@
 # 開発引き継ぎ：となりの手
 
-更新日：2026-10-05。Codex・Claude Code共通の作業記録。
+更新日：2026-10-12。Codex・Claude Code共通の作業記録。
 仕様は `docs/requirements_definition.md`、開発ルールは `AGENTS.md`。この記録だけから仕様・権限・外部設定の変更を判断しない。
+
+## 2026-10-12 競合リトライとカレンダー改行の修正
+
+担当ツール：Codex。最新の `main` で確認できた2件の不具合を修正した。
+
+- `.ics` のタイトル等に単独CR（`\r`）が入ると、後続文字が新しいプロパティ行として解釈される可能性があった。CRLF・CR・LFをすべてリテラル `\n` にエスケープし、プロパティ注入のunit testを追加。
+- Firestore RESTのトランザクション競合時、固定間隔の再試行が並行要求と重なって同時担当が両方失敗し、ご本人の同時依頼でも409が返ることをFirestore Emulatorで再現。beginTransactionを含む409・429・503を最大8回、指数バックオフとジッター付きで再試行するよう変更。
+- ローカル検証：`npm run docs:check`、`typecheck`、`lint`、`test`（42件）、`test:db`（5件）、`test:e2e`（8件）、`build:cloudflare` がすべて通過。E2Eは375/390/430pxを含む。DBスキーマ・Rules・Indexの変更なし。
+- PR作成・マージ・本番Workerへの反映は未実施。公開機能フラグ、Firebase設定、Secrets、メール送信は変更していない。
 
 ## 現在の方針
 
