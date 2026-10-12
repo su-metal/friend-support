@@ -12,34 +12,37 @@ const time = z.union([
   z.literal(""),
   z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
 ]);
-export const slotSchema = z
-  .object({
-    id: z.string().uuid().optional(),
-    categoryId: z.enum([
-      "meal",
-      "shopping",
-      "transport",
-      "housework",
-      "pet",
-      "other",
-    ]),
-    title: text(80).min(1, "予定の名前を入力してください"),
-    description: text(500),
-    date: dateSchema,
-    startTime: time,
-    endTime: time,
-    quantityNeeded: z.literal(1),
-    locationSummary: text(100),
-    privateInstructions: text(1000),
-    mealPeople: z.number().int().min(1).max(20).optional(),
-    foodDislikes: text(200).optional(),
-    allergyNotes: text(300).optional(),
-    handoffPreference: text(200).optional(),
-  })
-  .refine((s) => !s.endTime || (!!s.startTime && s.endTime > s.startTime), {
-    message: "終了時刻は開始時刻より後にしてください",
-    path: ["endTime"],
-  });
+const slotFieldsSchema = z.object({
+  categoryId: z.enum([
+    "meal",
+    "shopping",
+    "transport",
+    "housework",
+    "pet",
+    "other",
+  ]),
+  title: text(80).min(1, "予定の名前を入力してください"),
+  description: text(500),
+  date: dateSchema,
+  startTime: time,
+  endTime: time,
+  quantityNeeded: z.literal(1),
+  locationSummary: text(100),
+  privateInstructions: text(1000),
+  mealPeople: z.number().int().min(1).max(20).optional(),
+  foodDislikes: text(200).optional(),
+  allergyNotes: text(300).optional(),
+  handoffPreference: text(200).optional(),
+});
+const validSlotTime = (s: { startTime: string; endTime: string }) =>
+  !s.endTime || (!!s.startTime && s.endTime > s.startTime);
+const slotTimeIssue = {
+  message: "終了時刻は開始時刻より後にしてください",
+  path: ["endTime"],
+};
+export const slotSchema = slotFieldsSchema
+  .extend({ id: z.string().uuid().optional() })
+  .refine(validSlotTime, slotTimeIssue);
 export const pageDraftSchema = z
   .object({
     recipientDisplayName: text(60).min(
@@ -54,10 +57,7 @@ export const pageDraftSchema = z
       .string()
       .regex(/^\d{4,8}$/, "パスコードは4〜8桁の数字です")
       .optional(),
-    slots: z
-      .array(slotSchema)
-      .min(1, "サポート予定を1件以上追加してください")
-      .max(60),
+    slots: z.array(slotSchema).max(60),
   })
   .superRefine((p, ctx) => {
     if (p.endDate < p.startDate)
@@ -94,6 +94,10 @@ export const pageDraftSchema = z
         message: "予定が重複しています",
       });
   });
+export const slotsToAddSchema = z
+  .array(slotFieldsSchema.refine(validSlotTime, slotTimeIssue))
+  .min(1)
+  .max(60);
 export const recipientRequestSchema = z
   .object({
     kind: z.enum(["meal", "supplies", "transport", "housework", "other"]),

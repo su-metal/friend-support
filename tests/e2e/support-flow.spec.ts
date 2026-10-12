@@ -27,27 +27,40 @@ for (const width of [375, 390, 430]) {
       .click();
     await page.getByRole("button", { name: "デモでページ作成を試す" }).click();
     await page
-      .getByLabel("サポートする方のお名前")
+      .getByLabel("サポートする方の呼び名")
       .fill(`確認家族${viewportName}`);
     await page
-      .getByLabel("みんなへのひとこと")
-      .fill("身近な人と少しずつサポートします。");
-    await page.getByRole("button", { name: "次へ", exact: true }).click();
-    await page.getByRole("button", { name: "次へ", exact: true }).click();
-    await page.getByRole("button", { name: "🍱 食事" }).click();
+      .getByRole("button", { name: "ページを作って予定を追加する" })
+      .click();
+    await expect(
+      page.getByRole("heading", { name: `確認家族${viewportName}のサポート` }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "ページを公開する", exact: true }),
+    ).toBeDisabled();
+    await page.getByRole("button", { name: "複数日に追加" }).click();
+    const availableDays = page.locator(".calendar-day:not([disabled])");
+    await availableDays.nth(0).click();
+    await availableDays.nth(1).click();
+    await page.getByRole("button", { name: "選択した日に追加" }).click();
+    await page.getByRole("button", { name: "食事", exact: true }).click();
+    await page.getByText("時刻・詳しい案内（任意）").click();
     await page
       .getByLabel("詳しい受け渡し方法・住所")
       .fill("E2E非公開住所101号室");
     await page.getByLabel("アレルギー等の注意").fill("E2E非公開食事注意");
-    await page.getByRole("button", { name: "この予定を保存する" }).click();
-    await page.getByRole("button", { name: "次へ", exact: true }).click();
-    await page.getByRole("button", { name: "下書きを保存して公開へ" }).click();
+    await page.getByRole("button", { name: "下書きに追加する" }).click();
+    await expect(page.getByText("2/60件", { exact: true })).toBeVisible();
     await page
       .getByRole("button", { name: "ページを公開する", exact: true })
       .click();
     await expect(
       page.getByText("サポートページを公開しました。", { exact: true }),
     ).toBeVisible();
+    await page.locator(".calendar-day:not([disabled])").nth(2).click();
+    await page.getByRole("button", { name: "食事", exact: true }).click();
+    await page.getByRole("button", { name: "公開ページに追加する" }).click();
+    await expect(page.getByText("3/60件", { exact: true })).toBeVisible();
     const dashboardUrl = page.url();
     const publicUrl = await page
       .getByRole("textbox", { name: "共有リンク" })
@@ -78,7 +91,7 @@ for (const width of [375, 390, 430]) {
         () => document.documentElement.scrollWidth <= window.innerWidth,
       ),
     ).toBe(true);
-    await visitor.getByRole("button", { name: "私が担当する" }).click();
+    await visitor.getByRole("button", { name: "私が担当する" }).first().click();
     expect(
       await visitor.evaluate(() =>
         document.querySelector("dialog")?.contains(document.activeElement),
@@ -86,7 +99,7 @@ for (const width of [375, 390, 430]) {
     ).toBe(true);
     await visitor.keyboard.press("Escape");
     await expect(visitor.getByRole("dialog")).toHaveCount(0);
-    await visitor.getByRole("button", { name: "私が担当する" }).click();
+    await visitor.getByRole("button", { name: "私が担当する" }).first().click();
     await visitor.getByLabel("お名前", { exact: true }).fill("E2E支援者");
     await visitor.getByLabel("ひとこと").fill("主催者にだけ伝える内容");
     await visitor
@@ -139,7 +152,10 @@ for (const width of [375, 390, 430]) {
     );
     await page.goto(dashboardUrl);
     await expect(
-      page.locator(".organizer-slot").getByText("募集中", { exact: true }),
+      page
+        .locator(".organizer-slot")
+        .getByText("募集中", { exact: true })
+        .first(),
     ).toBeVisible();
     // APIも同じ1枠で競合する。ブラウザー内の同一オリジンfetchを使用。
     const endpoint =
@@ -165,11 +181,13 @@ for (const width of [375, 390, 430]) {
     await visitorContext.close();
   });
 }
-test("公開APIのCSRFと認証を拒否する", async ({ request }) => {
+test("公開APIのCSRFと認証を拒否する", async ({ request, page }) => {
+  await page.goto("/");
+  const origin = new URL(page.url()).origin;
   const response = await request.post("/api/pages", { data: {} });
   expect(response.status()).toBe(403);
   const auth = await request.post("/api/pages", {
-    headers: { Origin: "http://127.0.0.1:3000" },
+    headers: { Origin: origin },
     data: {},
   });
   expect(auth.status()).toBe(401);
