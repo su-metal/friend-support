@@ -10,6 +10,8 @@
 - ローカル検証（origin/main からの隔離チェックアウト）：`npm run docs:check`、typecheck、lint、unit 42件、Firestore emulator integration 5件、E2E 8件（375/390/430px）を通過。Playwrightで開発時レスポンスに`unsafe-eval`があり、本番CSPに含まれないことを確認。
 - Cloudflare build成功（OpenNextのWindows警告あり）。WranglerローカルpreviewはHTTP 200、本番CSPに`unsafe-eval`がないことを確認。実デプロイ・実接続の確認ではない。
 - 本番デプロイ・Cloudflare設定変更は行っていない。
+- GitHub：ドラフトPR [#5](https://github.com/su-metal/friend-support/pull/5) を作成し、ブランチをpush済み。未マージ・未デプロイ。
+- DB変更なし。次の作業はPRレビュー・マージ後の別途指定されたリリース作業。
 
 ## 2026-10-12 競合リトライとカレンダー改行の修正
 
