@@ -5,12 +5,15 @@
 
 ## 2026-10-12 競合リトライとカレンダー改行の修正
 
-担当ツール：Codex。最新の `main` で確認できた2件の不具合を修正した。
+担当ツール：Codex。GitHub [PR #3](https://github.com/su-metal/friend-support/pull/3) を `main` にsquash mergeし、本番Worker `friend-support` に反映した。
 
 - `.ics` のタイトル等に単独CR（`\r`）が入ると、後続文字が新しいプロパティ行として解釈される可能性があった。CRLF・CR・LFをすべてリテラル `\n` にエスケープし、プロパティ注入のunit testを追加。
 - Firestore RESTのトランザクション競合時、固定間隔の再試行が並行要求と重なって同時担当が両方失敗し、ご本人の同時依頼でも409が返ることをFirestore Emulatorで再現。beginTransactionを含む409・429・503を最大8回、指数バックオフとジッター付きで再試行するよう変更。
 - ローカル検証：`npm run docs:check`、`typecheck`、`lint`、`test`（42件）、`test:db`（5件）、`test:e2e`（8件）、`build:cloudflare` がすべて通過。E2Eは375/390/430pxを含む。DBスキーマ・Rules・Indexの変更なし。
-- PR作成・マージ・本番Workerへの反映は未実施。公開機能フラグ、Firebase設定、Secrets、メール送信は変更していない。
+- マージSHA `dad1ccf7307e53a27a5c36ca49eafdbcf4b45627` から `npm run deploy` を実行。Worker Version ID `d8de8ee1-c514-4df4-a179-16c6ca75b043`。Wranglerの配信状態でこのVersionが100%であることを確認。Cron `*/10 * * * *` と既存vars／Secretsを維持。
+- 本番読み戻し：`/`、`/guides`、`/guides/coordinate-support`、`/sitemap.xml`、`/robots.txt` は200。サイトマップに `/r/` がないこと、robotsが `/r/` をDisallowすることを確認。`/r/smoke-check` と、Origin不正の本人用API POSTはいずれも404。
+- 本番Versionの `ENABLE_RECIPIENT_ACCESS=false`、`EMAIL_FROM` 未設定を確認。本人用リンクはOFFのまま。Firebase設定・DB・Secrets・メール送信は変更していない。
+- 未確認：iPhone/Android実機でのLINE起動とICS取り込み、本人によるFirebaseログインメールの受信・操作。支援通知は `EMAIL_FROM` の設定とoutbox確認が済むまでOFF。
 
 ## 現在の方針
 
