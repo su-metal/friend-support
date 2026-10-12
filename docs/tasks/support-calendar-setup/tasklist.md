@@ -8,5 +8,5 @@
 - [x] 要件、DB契約、開発引き継ぎを更新する。
 - [x] unit/serviceと375/390/430pxのE2Eを更新する。
 - [x] docs:check、typecheck、lint、unit、Firestore integration、E2E、Cloudflare buildを実行する。
-- [ ] PRを作成して成果物に添付する。
+- [x] PRを作成して成果物に添付する。
 
