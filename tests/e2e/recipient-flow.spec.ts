@@ -49,7 +49,14 @@ for (const width of [375, 390, 430]) {
       .browser()!
       .newContext({ viewport: { width, height: 844 } });
     const recipient = await recipientContext.newPage();
-    await recipient.goto(recipientUrl);
+    const recipientResponse = await recipient.goto(recipientUrl);
+    expect(recipientResponse?.ok()).toBe(true);
+    expect(recipientResponse?.headers()["x-robots-tag"]).toContain(
+      "noindex",
+    );
+    expect(recipientResponse?.headers()["cache-control"]).toContain(
+      "no-store",
+    );
     await expect(recipient.getByRole("heading", { level: 1 })).toContainText(
       "困ったときはここから",
     );
@@ -107,9 +114,32 @@ for (const width of [375, 390, 430]) {
     );
     expect(JSON.stringify(await api.json())).not.toContain("E2E本人非公開");
 
-    await recipient
-      .getByRole("button", { name: "ご本人用ページにもどる" })
+    // 主催者が元の予定を整理し、本人のお願いだけが残った状態を作る。
+    await page.goto(dashboardUrl);
+    await page
+      .getByRole("link", { name: "ページの設定・予定を詳しく編集" })
       .click();
+    await page.getByRole("button", { name: "次へ", exact: true }).click();
+    await page.getByRole("button", { name: "次へ", exact: true }).click();
+    await page
+      .getByRole("button", { name: "夕食を届けるを削除" })
+      .click();
+    await page.getByRole("button", { name: "次へ", exact: true }).click();
+    await page.getByRole("button", { name: "変更を保存" }).click();
+    await expect(page).toHaveURL(
+      new RegExp(`${new URL(dashboardUrl).pathname}$`),
+    );
+    await recipient.goto(recipientUrl);
+    await expect(
+      recipient.getByRole("button", { name: "このお願いを取り消す" }),
+    ).toBeDisabled();
+    await expect(
+      recipient.getByText(
+        "最後の予定のため、このまま取り消せません。ページを作った方に相談してください。",
+      ),
+    ).toBeVisible();
+    await noHorizontalScroll(recipient);
+
     await recipient.getByRole("button", { name: "受付をお休みにする" }).click();
     await expect(
       recipient.getByRole("button", { name: "受付を再開する" }),

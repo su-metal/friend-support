@@ -189,14 +189,31 @@ function RecipientOverview({
                 </p>
               )}
               {s.mine && <p className="field-hint">あなたが出したお願い</p>}
-              {s.mine && s.status === "open" && (
-                <button
-                  className="cancel-link"
-                  onClick={() => setWithdrawId(s.id)}
-                >
-                  このお願いを取り消す
-                </button>
-              )}
+              {s.mine && s.status === "open" &&
+                (s.canWithdraw ? (
+                  <button
+                    className="cancel-link"
+                    onClick={() => setWithdrawId(s.id)}
+                  >
+                    このお願いを取り消す
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      aria-describedby={`withdraw-blocked-${s.id}`}
+                      className="cancel-link"
+                      disabled
+                    >
+                      このお願いを取り消す
+                    </button>
+                    <p
+                      className="field-hint"
+                      id={`withdraw-blocked-${s.id}`}
+                    >
+                      最後の予定のため、このまま取り消せません。ページを作った方に相談してください。
+                    </p>
+                  </>
+                ))}
             </article>
           ))}
         </div>

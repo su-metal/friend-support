@@ -139,12 +139,124 @@ describe("ご本人用リンク", () => {
     const p = await published();
     const { token } = await recipient.issueLink(user, p.id);
     const { slotId } = await recipient.addRequest(token, request());
+    expect(
+      (await recipient.view(token))?.slots.find((s) => s.id === slotId)
+        ?.canWithdraw,
+    ).toBe(true);
     await recipient.withdrawRequest(token, slotId);
     await recipient.withdrawRequest(token, slotId);
     const organizer = await support.organizerPage(user, p.id);
     expect(organizer.slots.map((s) => s.id)).not.toContain(slotId);
     expect(organizer.recipientSlotIds).toEqual([]);
     expect(await store.get(`slot_secrets/${slotId}`)).toBeNull();
+  });
+  it("終了したページでは本人用リンクの閲覧・追加・取り消し・設定変更を拒否する", async () => {
+    const p = await published();
+    const { token } = await recipient.issueLink(user, p.id);
+    const { slotId } = await recipient.addRequest(token, request());
+    await support.setStatus(user, p.id, "closed");
+
+    const beforePage = await store.get<PageDocument>(`support_pages/${p.id}`);
+    const beforeSlot = await store.get(`support_slots/${slotId}`);
+    const beforeSecret = await store.get(`slot_secrets/${slotId}`);
+    expect(await recipient.view(token)).toBeNull();
+    await expect(recipient.addRequest(token, request())).rejects.toMatchObject({
+      status: 404,
+    });
+    await expect(
+      recipient.withdrawRequest(token, slotId),
+    ).rejects.toMatchObject({ status: 404 });
+    await expect(
+      recipient.updateSettings(token, { paused: true }),
+    ).rejects.toMatchObject({ status: 404 });
+    expect(await store.get(`support_pages/${p.id}`)).toEqual(beforePage);
+    expect(await store.get(`support_slots/${slotId}`)).toEqual(beforeSlot);
+    expect(await store.get(`slot_secrets/${slotId}`)).toEqual(beforeSecret);
+    expect(
+      await store.get(`analytics_events/recipient-withdrawn-${slotId}`),
+    ).toBeNull();
+  });
+  it("JSTの終了日当日は利用でき、翌日から本人用リンクを拒否する", async () => {
+    const base = draft(),
+      today = todayJst();
+    const id = await support.create(user, {
+      ...base,
+      startDate: today,
+      endDate: today,
+      slots: [{ ...base.slots[0], date: today }],
+    });
+    await support.setStatus(user, id, "published");
+    const { token } = await recipient.issueLink(user, id);
+    const { slotId } = await recipient.addRequest(token, request({ date: today }));
+    expect((await recipient.view(token))?.canRequest).toBe(true);
+
+    const page = (await store.get<PageDocument>(`support_pages/${id}`))!;
+    await store.set(`support_pages/${id}`, {
+      ...page,
+      endDate: addDays(today, -1),
+    });
+    const expired = await store.get<PageDocument>(`support_pages/${id}`);
+    const beforeSlot = await store.get(`support_slots/${slotId}`);
+    expect(await recipient.view(token)).toBeNull();
+    await expect(
+      recipient.addRequest(token, request()),
+    ).rejects.toMatchObject({ status: 404 });
+    await expect(
+      recipient.withdrawRequest(token, slotId),
+    ).rejects.toMatchObject({ status: 404 });
+    await expect(
+      recipient.updateSettings(token, { paused: true }),
+    ).rejects.toMatchObject({ status: 404 });
+    expect(await store.get(`support_pages/${id}`)).toEqual(expired);
+    expect(await store.get(`support_slots/${slotId}`)).toEqual(beforeSlot);
+    expect(
+      await store.get(`analytics_events/recipient-withdrawn-${slotId}`),
+    ).toBeNull();
+  });
+  it("公開中の最後の本人のお願いは409で拒否し、DBと計測を変えない", async () => {
+    const p = await published();
+    const { token } = await recipient.issueLink(user, p.id);
+    const { slotId } = await recipient.addRequest(token, request());
+    const current = await support.organizerPage(user, p.id);
+    const ownSlot = current.slots.find((s) => s.id === slotId);
+    if (!ownSlot) throw new Error("recipient request missing");
+    await support.save(
+      user,
+      p.id,
+      {
+        ...draft(),
+        recipientDisplayName: current.recipientDisplayName,
+        description: current.description,
+        startDate: current.startDate,
+        endDate: current.endDate,
+        visibility: current.visibility,
+        slots: [{ ...ownSlot }],
+      },
+      current.revision,
+    );
+    const onlyRequest = await support.organizerPage(user, p.id);
+    const beforePage = await store.get<PageDocument>(`support_pages/${p.id}`);
+    const beforeSlot = await store.get(`support_slots/${slotId}`);
+    const beforeSecret = await store.get(`slot_secrets/${slotId}`);
+    expect(onlyRequest.slots).toHaveLength(1);
+    expect(
+      onlyRequest &&
+        (await recipient.view(token))?.slots.find((s) => s.id === slotId)
+          ?.canWithdraw,
+    ).toBe(false);
+
+    await expect(
+      recipient.withdrawRequest(token, slotId),
+    ).rejects.toMatchObject({
+      status: 409,
+      code: "last_published_slot",
+    });
+    expect(await store.get(`support_pages/${p.id}`)).toEqual(beforePage);
+    expect(await store.get(`support_slots/${slotId}`)).toEqual(beforeSlot);
+    expect(await store.get(`slot_secrets/${slotId}`)).toEqual(beforeSecret);
+    expect(
+      await store.get(`analytics_events/recipient-withdrawn-${slotId}`),
+    ).toBeNull();
   });
   it("期間外・過去の日付と公開前のページにはお願いを出せない", async () => {
     const p = await published();
