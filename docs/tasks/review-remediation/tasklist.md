@@ -1,6 +1,6 @@
 # レビュー修正のタスク一覧
 
-作成日：2026-10-12。状態：R1〜R4を修正し、全ローカル検証が成功。ユーザー指示によりPR・マージ・デプロイを実施中。本番フラグは既定OFFを維持する。
+作成日：2026-10-12。状態：R1〜R4を修正し、全ローカル検証・PR #7のSquash merge・本番デプロイが成功。本番フラグはOFFを維持した。
 
 [要件](requirements.md) / [実装計画](design.md) / [指摘と検証結果](../../code-review-2026-10-12.md) / [開発引き継ぎ](../../development-handoff.md)
 
@@ -49,11 +49,11 @@
 - [x] 開発引き継ぎとレビュー記録に変更・DB・検証・公開状態・未確認を記録した。
 - [x] 差分をレビューし、`git diff --check` を確認した。
 
-検証結果：unit 49件、Firestore integration 7件、E2E 8件成功。最新main基準の隔離先でlintエラー・警告0件。OpenNextはWindows非推奨の注意を表示するがbuildは成功。詳細は [開発引き継ぎ](../../development-handoff.md) を参照。
+検証結果：unit 49件、Firestore integration 7件、E2E 8件成功。最新main基準の隔離先でlint成功。OpenNextはWindows非推奨の注意を表示するがbuildは成功。詳細は [開発引き継ぎ](../../development-handoff.md) を参照。
 
 ## 5：PR・マージ・デプロイ
 
-- [ ] 最新main基準で修正だけをcommit・pushし、PRを作成する。
-- [ ] PRの差分・CIを確認し、マージ後のSHAを確定する。
-- [ ] マージSHAを本番Workerへデプロイし、バージョン配信率と公開HTTP応答を読み戻す。
-- [ ] 開発引き継ぎにPR、SHA、Workerバージョン、公開確認、未確認事項を記録する。本番の本人用フラグはOFFのままにする。
+- [x] 最新main基準で修正だけをcommit・pushし、PR #7を作成した。
+- [x] PR差分を確認してSquash mergeし、merge SHA `eef65bb2fe84248ea3c7167ab5f962730d36cf77` を確定した。GitHub Actionsのworkflow runとcommit statusは設定されていなかった。ローカル検証はすべて成功した。
+- [x] マージ済みコードを本番Workerへデプロイし、Version `a4d7a753-93b5-487c-8945-ad165047eeb6` の100%配信、Cron、公開HTTP応答を読み戻した。
+- [x] 開発引き継ぎと要件書にPR、SHA、Workerバージョン、公開確認、未確認事項を記録した。本番の本人用フラグはOFF。

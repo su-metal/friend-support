@@ -74,9 +74,9 @@ Workerの入口、self service binding、`waitUntil`、Cron、CSPはコードと
 
 2026-10-12にレビュー指摘へ対応した。R1は最新mainで確認した本人用の依存・型・factory・表示修正を反映して解消。R2はWizardから `baseRevision` を送り、サービス契約・実装でも必須化し、欠落・不正版をトランザクション前に拒否する。R3はclosed・archived・削除中・JST終了日の翌日以降の本人用リンクを拒否。R4は公開中の最後の予定となる取り消しを409で拒否し、画面で理由と相談先を案内する。
 
-最終結果：`npm run docs:check`、`npm run typecheck`、`npm run lint`（エラー0・警告3）、`npm test`（49件）、`npm run test:db`（7件）、`npm run build:cloudflare`、E2E（8件）が成功した。E2Eは隔離したlocal production buildで375/390/430pxを確認し、ご本人用URLのnoindex/no-store、公開情報とLINE共有文、編集保存、お休み・無効化、支援者の担当・キャンセル、公開APIのCSRF・認証、robots・サイトマップを通した。
+最終結果：`npm run docs:check`、`npm run typecheck`、`npm run lint`、`npm test`（49件）、`npm run test:db`（7件）、`npm run build:cloudflare`、E2E（8件）が成功した。E2Eは隔離したlocal production buildで375/390/430pxを確認し、ご本人用URLのnoindex/no-store、公開情報とLINE共有文、編集保存、お休み・無効化、支援者の担当・キャンセル、公開APIのCSRF・認証、robots・サイトマップを通した。
 
-Lint警告3件は入れ子の生成済みCloudflare型ファイルと既存のレビュー用スクリプトに限る。Cloudflare buildはWindowsでのOpenNext利用に関する警告を出したが成功した。Firestoreスキーマ、Rules、Indexes、移行、Secrets、本番フラグに変更はない。コード変更は未コミットで、push・PR・deployは行っていない。ユーザー確認済みのLINE受信・ログインを今回再実行していない。
+Cloudflare buildはWindowsでのOpenNext利用に関する警告を出したが成功した。この節は最新main基準のリリース候補を作る前のレビュー用作業ツリーの結果を記録する。コードを含めFirestoreスキーマ、Rules、Indexes、移行、Secrets、本番フラグの変更はこの時点では行っていない。LINE受信・ログインはユーザー確認済みだが、この記録でCodexは再実行していない。最新main基準でのPR・デプロイ結果は後述する。
 
 ## 初回レビュー時に必要だった次の作業（後続で実施済み）
 
@@ -87,4 +87,4 @@ Lint警告3件は入れ子の生成済みCloudflare型ファイルと既存の�
 
 ## 最新main基準のリリース候補
 
-2026-10-12に最新main `bec8d1ba714bf04073bd9d4ca8e0f9b1c9758319` を取得し、PR #2/#3/#5/#6の変更を確認した。R1はすでに最新mainへ入っていた。R2〜R4の修正を最新mainから作った隔離候補で再検証し、unit 49件、Firestore Emulator 7件、E2E 8件、docs:check、typecheck、lint、Cloudflare buildが成功した。E2Eは375/390/430px、Cloudflare buildはOpenNextのWindows警告あり。ユーザー指示によりPR・マージ・デプロイを進めている。本番フラグは既定OFFのまま。
+2026-10-12に最新main `bec8d1ba714bf04073bd9d4ca8e0f9b1c9758319` を取得し、PR #2/#3/#5/#6の変更を確認した。R1はすでに最新mainへ入っていた。R2〜R4の修正を最新mainから作った隔離候補で再検証し、unit 49件、Firestore Emulator 7件、E2E 8件、docs:check、typecheck、lint、Cloudflare buildが成功した。E2Eは375/390/430px、Cloudflare buildはOpenNextのWindows警告あり。PR #7はSquash merge済み（merge commit SHA `eef65bb2fe84248ea3c7167ab5f962730d36cf77`）。本番Worker `friend-support` にデプロイ済み（Version `a4d7a753-93b5-487c-8945-ad165047eeb6`、100%配信、Cron維持）。公開6ルートが200、本人用URLのfeature flag OFF時は404、robots・サイトマップの除外も確認。本番フラグは既定OFFのまま。LINE受信とログインはユーザー申告で確認済みだが、今回再実行していない。
