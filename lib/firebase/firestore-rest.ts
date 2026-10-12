@@ -182,29 +182,32 @@ export class FirestoreRestStore implements DocumentStore {
     return result;
   }
   async transaction<T>(work: (tx: Transaction) => Promise<T>): Promise<T> {
-    for (let attempt = 0; attempt < 5; attempt++) {
-      const { transaction } = (await this.request(
-        `${this.database}/documents:beginTransaction`,
-        {
-          method: "POST",
-          body: JSON.stringify({ options: { readWrite: {} } }),
-        },
-      )) as { transaction: string };
-      const writes: unknown[] = [];
-      const tx: Transaction = {
-        get: <U>(path: string) => this.get<U>(path, transaction),
-        getMany: <U>(paths: string[]) => this.getMany<U>(paths, transaction),
-        set: (path, data) =>
-          writes.push({
-            update: {
-              name: `${this.database}/documents/${path}`,
-              fields: encodeFields(data),
-            },
-          }),
-        delete: (path) =>
-          writes.push({ delete: `${this.database}/documents/${path}` }),
-      };
+    const maxAttempts = 8;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      let transaction: string | undefined;
       try {
+        const begun = (await this.request(
+          `${this.database}/documents:beginTransaction`,
+          {
+            method: "POST",
+            body: JSON.stringify({ options: { readWrite: {} } }),
+          },
+        )) as { transaction: string };
+        transaction = begun.transaction;
+        const writes: unknown[] = [];
+        const tx: Transaction = {
+          get: <U>(path: string) => this.get<U>(path, transaction),
+          getMany: <U>(paths: string[]) => this.getMany<U>(paths, transaction),
+          set: (path, data) =>
+            writes.push({
+              update: {
+                name: `${this.database}/documents/${path}`,
+                fields: encodeFields(data),
+              },
+            }),
+          delete: (path) =>
+            writes.push({ delete: `${this.database}/documents/${path}` }),
+        };
         const value = await work(tx);
         await this.request(`${this.database}/documents:commit`, {
           method: "POST",
@@ -212,20 +215,29 @@ export class FirestoreRestStore implements DocumentStore {
         });
         return value;
       } catch (error) {
-        try {
-          await this.request(`${this.database}/documents:rollback`, {
-            method: "POST",
-            body: JSON.stringify({ transaction }),
-          });
-        } catch {
-          /* Transaction can already be aborted. */
+        if (transaction) {
+          try {
+            await this.request(`${this.database}/documents:rollback`, {
+              method: "POST",
+              body: JSON.stringify({ transaction }),
+            });
+          } catch {
+            /* Transaction can already be aborted. */
+          }
         }
         if (
           error instanceof FirestoreError &&
           [409, 429, 503].includes(error.status) &&
-          attempt < 4
+          attempt < maxAttempts - 1
         ) {
-          await new Promise((r) => setTimeout(r, 40 * (attempt + 1)));
+          // Jitter prevents concurrent requests from retrying in lockstep.
+          const delay = Math.min(500, 40 * 2 ** attempt);
+          await new Promise((resolve) => {
+            setTimeout(
+              resolve,
+              Math.round(delay * (0.5 + Math.random() * 0.5)),
+            );
+          });
           continue;
         }
         throw error;

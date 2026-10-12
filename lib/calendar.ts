@@ -16,7 +16,7 @@ function escapeText(value: string) {
     .replace(/\\/g, "\\\\")
     .replace(/;/g, "\\;")
     .replace(/,/g, "\\,")
-    .replace(/\r?\n/g, "\\n");
+    .replace(/\r\n|\r|\n/g, "\\n");
 }
 
 // RFC 5545: 75オクテットを超える行は折り返し、続きの行は空白で始める。
