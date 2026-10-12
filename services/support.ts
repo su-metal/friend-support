@@ -374,7 +374,13 @@ export class SupportService
         : {}),
     });
   }
-  async save(user: User, id: string, input: PageDraft, baseRevision?: number) {
+  async save(user: User, id: string, input: PageDraft, baseRevision: number) {
+    if (!Number.isSafeInteger(baseRevision) || baseRevision < 0)
+      throw new AppError(
+        "invalid_revision",
+        "保存時の版を確認できませんでした。画面を読み込み直してください",
+        400,
+      );
     const draft = pageDraftSchema.parse(input);
     const hash = draft.passcode ? await passcodeHash(draft.passcode) : "";
     await this.store.transaction(async (tx) => {
@@ -386,7 +392,7 @@ export class SupportService
           "period",
           "公開中のページには予定を1件以上残してください",
         );
-      if (baseRevision !== undefined && baseRevision !== (p.revision ?? 0))
+      if (baseRevision !== (p.revision ?? 0))
         throw new AppError(
           "stale",
           "ご本人がお願いを追加・取り消ししました。画面を読み込み直してから編集してください",

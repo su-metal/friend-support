@@ -6,6 +6,7 @@ export default defineConfig([
   ...nextTs,
   globalIgnores([
     ".next/**",
+    ".next-e2e/**",
     ".open-next/**",
     ".wrangler/**",
     ".secrets/**",

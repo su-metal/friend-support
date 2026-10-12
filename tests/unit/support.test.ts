@@ -72,6 +72,26 @@ describe("支援ページと担当", () => {
     ).rejects.toMatchObject({ code: "period" });
     expect((await service.organizerPage(user, p.id)).slots).toHaveLength(1);
   });
+  it("詳細保存は版の指定を必須にし、欠落・不正な版では状態を変えない", async () => {
+    const p = await published();
+    const input = {
+      ...draft(),
+      startDate: p.startDate,
+      endDate: p.endDate,
+      slots: p.slots.map((slot) => ({ ...slot })),
+    };
+    const before = await service.organizerPage(user, p.id);
+    await expect(
+      service.save(user, p.id, input, undefined as unknown as number),
+    ).rejects.toMatchObject({ status: 400, code: "invalid_revision" });
+    await expect(service.save(user, p.id, input, -1)).rejects.toMatchObject({
+      status: 400,
+      code: "invalid_revision",
+    });
+    const after = await service.organizerPage(user, p.id);
+    expect(after.revision).toBe(before.revision);
+    expect(after.slots).toEqual(before.slots);
+  });
 
   it("予定追加は所有者、期間、版、60件の上限を確認する", async () => {
     const id = await service.create(user, { ...draft(), slots: [] }),
@@ -125,7 +145,7 @@ describe("支援ページと担当", () => {
         ...draft(),
         description: "説明だけ変更",
         slots: [{ ...draft().slots[0], id: p.slots[0].id }],
-      }),
+      }, p.revision),
     ).resolves.toBeUndefined();
     expect((await service.organizerPage(user, p.id)).slots[0].status).toBe(
       "assigned",
@@ -139,7 +159,7 @@ describe("支援ページと担当", () => {
       visibility: "passcode",
       passcode: "5678",
       slots: [{ ...draft().slots[0], id: p.slots[0].id }],
-    });
+    }, p.revision);
     expect(await service.publicPage(p.slug, version)).toBe("locked");
     await expect(service.unlock(p.slug, "1234")).rejects.toMatchObject({
       status: 403,
@@ -266,7 +286,7 @@ describe("支援ページと担当", () => {
       service.save(user, p.id, {
         ...draft(),
         slots: [{ ...draft().slots[0], id: p.slots[0].id, title: "変更" }],
-      }),
+      }, p.revision),
     ).rejects.toMatchObject({ code: "assigned_slot" });
   });
   it("終了したページは受付と再公開を停止する", async () => {

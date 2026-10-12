@@ -22,7 +22,12 @@ export interface SupportPageService {
     slug: string,
     accessVersion?: string,
   ): Promise<PublicSupportPage | "locked" | null>;
-  save(user: User, id: string, draft: PageDraft): Promise<void>;
+  save(
+    user: User,
+    id: string,
+    draft: PageDraft,
+    baseRevision: number,
+  ): Promise<void>;
   setStatus(
     user: User,
     id: string,

@@ -32,7 +32,7 @@ FirestoreはドキュメントDBのため空のコレクションを事前作成
 
 キャンセル：ハッシュ参照→担当→ページ→予定を読み、activeであれば予定をopenへ戻し主催者通知を登録する。cancelledなら成功を返す。completedは拒否する。担当者の非公開案内はactive/completedだけに返す。
 
-ご本人のお願い：ハッシュ参照→ページを読み、recipientTokenHash一致・公開中・期間内・60枠未満を確認する。予定・slot_secrets・ページのslotIds/recipientSlotIds/revision・計測・主催者通知を同一commitで保存する。取り消しはrecipientSlotIdsに含まれ募集中の予定だけ。主催者の保存はbaseRevisionがrevisionと一致する場合だけ確定する。
+ご本人のお願い：ハッシュ参照→ページを読み、recipientTokenHash一致・削除中でない・closed/archiveでない・JST終了日前を確認して閲覧・変更を許可する。終了日は当日を含む。追加は公開中・期間内・60枠未満を確認し、予定・slot_secrets・ページのslotIds/recipientSlotIds/revision・計測・主催者通知を同一commitで保存する。取り消しはrecipientSlotIdsに含まれ募集中の予定だけ。公開中の予定が取り消し後に0件となる要求は409で拒否し、予定・秘密情報・revision・計測を変更しない。表示APIのcanWithdrawはページ状態・残件数・担当状態から計算し、DBには保存しない。主催者の保存は必須baseRevisionがrevisionと一致する場合だけ確定する。
 
 主催者のカレンダー追加：主催者IDとページ所有者、受付可能な状態、baseRevision、支援期間、今日以降の日付、既存枠を含む60件上限をサービス層で検証する。ページのslotIds・revision更新と予定・非公開情報の保存を同一commitで確定する。公開中ページでは追加した予定も即時募集対象になる。公開中ページは予定を0件にできず、予定0件の下書きは公開できない。
 

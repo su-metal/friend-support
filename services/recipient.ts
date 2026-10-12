@@ -42,7 +42,8 @@ async function pageByToken(tx: Pick<Transaction, "get">, token: string) {
   if (
     !p ||
     p.deletionRequestedAt ||
-    p.status === "archived" ||
+    ["closed", "archived"].includes(p.status) ||
+    p.endDate < todayJst() ||
     p.recipientTokenHash !== hash
   )
     return null;
@@ -145,13 +146,13 @@ export class RecipientService implements RecipientServiceContract {
       const slots = await tx.getMany<SupportSlot>(
         p.slotIds.map((id) => `support_slots/${id}`),
       );
+      const visibleSlots = slots.filter(
+        (s): s is SupportSlot => s !== null && s.status !== "cancelled",
+      );
       return {
         page: publicFields(p),
         // 公開ページと同じ項目だけを返し、非公開欄や担当者の連絡先は含めない。
-        slots: slots
-          .filter(
-            (s): s is SupportSlot => s !== null && s.status !== "cancelled",
-          )
+        slots: visibleSlots
           .sort((a, b) =>
             `${a.date}${a.startTime}`.localeCompare(`${b.date}${b.startTime}`),
           )
@@ -171,6 +172,10 @@ export class RecipientService implements RecipientServiceContract {
             createdAt: s.createdAt,
             updatedAt: s.updatedAt,
             mine: mine.has(s.id),
+            canWithdraw:
+              mine.has(s.id) &&
+              s.status === "open" &&
+              (p.status !== "published" || visibleSlots.length > 1),
           })),
         canRequest: acceptsRequests(p),
         slotLimitReached: p.slotIds.length >= MAX_SLOTS,
@@ -266,6 +271,15 @@ export class RecipientService implements RecipientServiceContract {
         throw new AppError(
           "assigned_slot",
           "担当が決まったお願いは取り消せません。担当の方か窓口の方に直接連絡してください",
+          409,
+        );
+      if (
+        p.status === "published" &&
+        p.slotIds.filter((id) => id !== slotId).length === 0
+      )
+        throw new AppError(
+          "last_published_slot",
+          "最後の予定のため、このまま取り消せません。ページを作った方に相談してください",
           409,
         );
       const stamp = now();

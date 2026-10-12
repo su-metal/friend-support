@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
+const isPlaywrightTest = process.env.PLAYWRIGHT_TEST_MODE === "true";
 const scriptSrc = ["'self'", "'unsafe-inline'", ...(process.env.NODE_ENV === "development" ? ["'unsafe-eval'"] : [])].join(" ");
 const config: NextConfig = {
+  distDir: isPlaywrightTest ? ".next-e2e" : ".next",
   poweredByHeader: false,
   async headers() {
     return [

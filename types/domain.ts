@@ -77,7 +77,7 @@ export interface OrganizerPage extends SupportPage {
 }
 export interface RecipientView {
   page: Omit<PublicSupportPage, "slots">;
-  slots: (SupportSlot & { mine: boolean })[];
+  slots: (SupportSlot & { mine: boolean; canWithdraw: boolean })[];
   canRequest: boolean;
   slotLimitReached: boolean;
 }
