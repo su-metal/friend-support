@@ -8,7 +8,7 @@
 - ページ作成フォームで呼び名と期間を決めて、予定0件の非公開下書きを保存できるようにした。管理画面のカレンダーから単日または複数日を選び、カテゴリと予定名を使って追加する。詳しい説明、時刻、非公開指示などは任意。
 - 予定追加APIは所有者、ページ状態、支援期間、過去日、60件上限、revisionをサービス層のトランザクションで検証する。予定一覧・revision・予定・秘密情報を同一commitで保存する。空ページの公開と公開中ページの全予定削除は拒否する。DB構造変更・移行はない。
 - ローカル検証：`npm run docs:check`、`npm run typecheck`、`npm run lint`、unit（45件）、Firestore Emulator integration（5件）、E2E（8件、375/390/430px）、`npm run build:cloudflare` が通過。lintはエラーなし・既存ファイル由来の警告2件。integrationは初回に競合テストが一度409となったが、再実行で5件すべて通過。OpenNextからWindows実行に関する警告あり。
-- GitHub PR [#6](https://github.com/su-metal/friend-support/pull/6) を作成し、Codex成果物へ添付済み。レビュー待ち・未マージ。
+- GitHub PR [#6](https://github.com/su-metal/friend-support/pull/6) を作成し、Codex成果物へ添付済み。2026-10-12にSquash merge済み（merge commit SHA `796f3c55db1c6bf03f5ec611c2e3165932acf06b`）。
 - Cloudflareデプロイ、実Firebase接続、実機LINE起動・カレンダー取り込みは未実施。DB構造変更なし。
 
 ## 2026-10-12 React開発モードのCSP修正
