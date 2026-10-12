@@ -1,6 +1,6 @@
 # レビュー指摘の実装計画
 
-作成日：2026-10-12。状態：設計に沿って実装・ローカル検証済み。外部リリースは未実施。修正要件は [requirements.md](requirements.md)、実績は [tasklist.md](tasklist.md)。レビューの現状値は [レビュー記録](../../code-review-2026-10-12.md)を参照する。
+作成日：2026-10-12。状態：設計に沿って実装・検証し、PR #7マージ・本番デプロイ済み。修正要件は [requirements.md](requirements.md)、実績は [tasklist.md](tasklist.md)。レビューの現状値は [レビュー記録](../../code-review-2026-10-12.md)を参照する。
 
 ## 実装順序
 

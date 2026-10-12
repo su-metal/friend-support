@@ -3,16 +3,17 @@
 更新日：2026-10-12。Codex・Claude Code共通の作業記録。
 仕様は `docs/requirements_definition.md`、開発ルールは `AGENTS.md`。この記録だけから仕様・権限・外部設定の変更を判断しない。
 
-## 2026-10-12 レビュー修正とリリース候補
+## 2026-10-12 レビュー修正・マージ・本番反映
 
 最新main `bec8d1ba714bf04073bd9d4ca8e0f9b1c9758319` を基準に、コードレビューのR2〜R4を修正した。R1の本人用機能の依存・型・factory修正はmainに含まれているため、差分へ重複していない。
 
 - 詳細編集の `baseRevision` をサービス契約で必須にし、負数・不正値をトランザクション前に400で拒否する。本人用リンクは手動終了、archived、削除中、JST終了日の翌日以降に無効化する。公開中の最後の予定となる本人依頼の取り消しは409で拒否し、表示で理由と主催者への相談を案内する。
 - 本人用unitで期限切れ・終了後の操作拒否と最終1件の状態不変を確認。Firestore Emulatorで7件、同時の最後2件の取り消し・担当登録との競合・ページ終了との競合を確認した。
 - 検証：docs:check、typecheck、lint（警告なし）、unit 49件、Firestore Emulator 7件、Cloudflare build、E2E 8件が成功。E2Eは375/390/430pxを含み、本人用URLのnoindex/no-store、公開情報、編集保存、本人用と支援者の主要導線を確認した。OpenNextはWindows利用に関する警告を表示した。
-- GitHub PR #2/#3/#5/#6は最新mainへマージ済み。既存のdirtyなルート作業ツリーは保持し、隔離候補で修正した。現在はPR作成中で、本番デプロイは未実施。Firestore schema・Rules・Indexes・migration、Secrets、Cloudflare設定、本番の本人用機能フラグは変更していない。本人用フラグは既定OFF。
-- LINE通知受信とログインはユーザー申告で確認済み。今回Codexが実メッセージ送信・実ログインを再実行した結果ではない。
-
+- GitHub PR [#7](https://github.com/su-metal/friend-support/pull/7) は2026-10-12にSquash merge済み（merge commit SHA `eef65bb2fe84248ea3c7167ab5f962730d36cf77`）。既存のdirtyなルート作業ツリーを保持し、隔離候補からリリースした。
+- 2026-10-12にマージ済みコードを本番Worker `friend-support` へ `npm run deploy`（`--keep-vars`）でデプロイ。Version ID `a4d7a753-93b5-487c-8945-ad165047eeb6` が `wrangler deployments status` で100%配信。Cron `*/10 * * * *` を維持。Cloudflare APIの504で2回終了した後、3回目の実行で成功した。
+- 公開確認：`/`、`/create`、`/login`、`/guides`、`/sitemap.xml`、`/robots.txt` は200、`/r/smoke-check` は404。robotsは `/r/` をDisallowし、サイトマップに個別支援・デモURLがないことを確認。`ENABLE_RECIPIENT_ACCESS=false` をデプロイ出力で確認し、機能フラグはOFFのまま。
+- Firestore schema・Rules・Indexes・migration、Secretsは変更なし。LINE通知受信とログインはユーザー申告で確認済み。今回Codexが実メッセージ送信・実ログインや本人用機能の本番操作を再実行した結果ではない。
 詳細な指摘・修正後の確認は `docs/code-review-2026-10-12.md`、作業要件・設計・進捗は `docs/tasks/review-remediation/` を参照する。
 
 ## 2026-10-12 カレンダーから始めるサポートページ作成
